@@ -128,7 +128,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	public function onDataComplianceExportUser(Event $event): void
 	{
 		/** @var   int $userID The user ID to export data for */
-		[$int] = array_values($event->getArguments());
+		[$userID] = array_values($event->getArguments());
 		$result = $event->getArgument('result', []);
 
 		$export = new SimpleXMLElement("<root></root>");
