@@ -87,10 +87,19 @@ class Email extends CMSPlugin implements SubscriberInterface
 
 		switch ($comment->enabled)
 		{
-			// Unpublished or Spam: send an email to Comment Managers
+			// Unpublished or Spam: email the Comment Managers
 			case 0:
 			case -3:
 			default:
+				// If the comment is marked as spam and managers_notify_spam is disabled no email will be sent.
+				$doIt = $comment->enabled != -3 ||
+				        $this->params->get('managers_notify_spam', 0) == 1;
+
+				if (!$doIt)
+				{
+					return;
+				}
+
 				$recipients        = $this->getCommentManagerRecipients();
 				$type              = ($comment->enabled == 0) ? 'com_engage.manage' : 'com_engage.spam';
 				$honorUnsubscribed = false;

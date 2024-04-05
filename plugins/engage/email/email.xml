@@ -55,6 +55,18 @@
                     <option value="1">JYES</option>
                 </field>
 
+                <field
+                        name="managers_notify_spam"
+                        type="radio"
+                        layout="joomla.form.field.radio.switcher"
+                        label="PLG_ENGAGE_EMAIL_MANAGERS_TOPLEVEL_NOTIFY_SPAM_LABEL"
+                        description="PLG_ENGAGE_EMAIL_MANAGERS_TOPLEVEL_NOTIFY_SPAM_DESC"
+                        default="0"
+                >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
             </fieldset>
         </fields>
     </config>

@@ -1,6 +1,7 @@
 <?php die(); ?>
 Akeeba Engage 3.3.4
 ================================================================================
+~ Do not email Comment Managers for spam messages by default
 ~ Update CliRouting helper for Joomla! 5
 ~ Workaround for Google indexing temporary URLs which are NOT in href or src attributes
 ~ Adding datePublished microdata alongside dateCreated [gh-313]
