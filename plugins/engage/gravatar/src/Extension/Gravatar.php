@@ -73,7 +73,7 @@ class Gravatar extends CMSPlugin implements SubscriberInterface
 
 		$customImage = trim($customImage);
 
-		if (empty($customImage))
+		if (empty($customImage) && $defaultImage === 'custom')
 		{
 			$defaultImage = 'mp';
 		}
