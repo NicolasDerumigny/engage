@@ -1,4 +1,8 @@
 <?php die(); ?>
+Akeeba Engage 3.3.5
+================================================================================
+# [LOW] Gravatar plugin always uses Mystery Person as the default image
+
 Akeeba Engage 3.3.4
 ================================================================================
 ~ Do not email Comment Managers for spam messages by default
@@ -8,7 +12,6 @@ Akeeba Engage 3.3.4
 # [HIGH] Exporting Engage data with DataCompliance fails
 # [MEDIUM] caching issues with conservative cache [gh-305]
 # [MEDIUM] Wrong lang parameter value in links [gh-304]
-# [LOW] Gravatar plugin always uses Mystery Person as the default image
 
 Akeeba Engage 3.3.3
 ================================================================================
