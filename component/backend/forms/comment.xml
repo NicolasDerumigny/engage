@@ -111,7 +111,7 @@
                id="commentText"
                cols="50"
                rows="5"
-               filter="JComponentHelper::filterText"
+               filter="\Joomla\CMS\Component\ComponentHelper::filterText"
                buttons="true"
                hiddenLabel="true"
                required="true"
