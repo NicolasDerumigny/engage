@@ -3,6 +3,7 @@ Akeeba Engage 3.3.5
 ================================================================================
 # [LOW] Gravatar plugin always uses Mystery Person as the default image
 # [LOW] Unintended dependency to Joomla's compatibility plugin due to XML form filtering
+# [LOW] Latest comments module strips out literal string `0` [gh-319]
 
 Akeeba Engage 3.3.4
 ================================================================================

@@ -113,7 +113,7 @@ final class Engage
 
 		$excerpt = explode(' ', $excerpt);
 		$excerpt = array_filter($excerpt, function ($x) {
-			return !empty($x);
+			return $x !== '';
 		});
 		$excerpt = array_slice($excerpt, 0, min($maxWords, count($excerpt)));
 		$excerpt = implode(' ', $excerpt);
