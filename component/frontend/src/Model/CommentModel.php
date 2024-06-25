@@ -90,7 +90,7 @@ class CommentModel extends AdminCommentModel
 		}
 
 		$db    = $this->getDbo();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->delete($db->quoteName('#__engage_unsubscribe'))
 			->where($db->quoteName('asset_id') . ' = :asset_id')
 			->where($db->quoteName('email') . ' = :email')

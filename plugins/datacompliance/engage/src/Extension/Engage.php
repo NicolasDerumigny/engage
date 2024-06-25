@@ -139,7 +139,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		$domain->addAttribute('name', 'engage_comments');
 		$domain->addAttribute('description', 'Comments, via Akeeba Engage');
 
-		$selectQuery = $db->getQuery(true)
+		$selectQuery = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select('*')
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('created_by') . ' = ' . $db->q($userID));
@@ -162,7 +162,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		// #__engage_comments by email
 		$user = Factory::getContainer()->get(UserFactoryInterface::class)->loadUserById($userID);
 
-		$selectQuery = $db->getQuery(true)
+		$selectQuery = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select('*')
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('email') . ' = ' . $db->q($user->email));

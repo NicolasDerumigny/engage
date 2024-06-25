@@ -157,7 +157,7 @@ class Email extends CMSPlugin implements SubscriberInterface
 	{
 		// Get all groups
 		$db    = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([$db->qn('id')])
 			->from($db->qn('#__usergroups'));
 
@@ -238,7 +238,7 @@ class Email extends CMSPlugin implements SubscriberInterface
 	protected function getUnsubscribedEmails(int $asset_id): array
 	{
 		$db    = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->quoteName('email'))
 			->from($db->quoteName('#__engage_unsubscribe'))
 			->where($db->quoteName('asset_id') . ' = :asset_id')
@@ -259,7 +259,7 @@ class Email extends CMSPlugin implements SubscriberInterface
 	{
 		$db     = $this->getDatabase();
 		$emails = array_map([$db, 'q'], $emails);
-		$query  = $db->getQuery(true)
+		$query  = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([
 				$db->qn('email'),
 				$db->qn('id'),

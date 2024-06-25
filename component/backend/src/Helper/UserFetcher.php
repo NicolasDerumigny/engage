@@ -142,7 +142,7 @@ class UserFetcher
 
 		/** @var DatabaseDriver $db */
 		$db = Factory::getContainer()->get(DatabaseInterface::class);
-		$q  = $db->getQuery(true)
+		$q  = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('id'))
 			->from($db->qn('#__users'))
 			->where($db->qn('email') . ' = ' . $db->q($email));

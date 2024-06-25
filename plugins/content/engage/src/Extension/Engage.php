@@ -178,7 +178,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		try
 		{
 			$db    = $this->getDatabase();
-			$query = $db->getQuery(true)
+			$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 				->select([$db->qn('asset_id')])
 				->from($db->qn('#__content'))
 				->where($db->qn('title') . ' LIKE ' . $db->q($filter));
@@ -302,7 +302,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 
 		$assetId = $data->asset_id;
 		$db      = $this->getDatabase();
-		$query   = $db->getQuery(true)
+		$query   = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->delete($db->qn('#__engage_comments'))
 			->where($db->qn('asset_id') . ' = ' . $db->q($assetId));
 
@@ -655,7 +655,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		$this->cachedArticles[$metaKey] = null;
 
 		$db    = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([
 				$db->qn('id'),
 			])
@@ -722,7 +722,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		}
 
 		$db    = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('asset_id'))
 			->from($db->qn('#__content'))
 			->where($db->qn('id') . ' = ' . $db->q($id));

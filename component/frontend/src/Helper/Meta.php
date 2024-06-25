@@ -286,13 +286,13 @@ final class Meta
 		$cid       = [];
 
 		// Nuke comments directly attributed to the user ID
-		$q   = $db->getQuery(true)
+		$q   = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('id'))
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('created_by') . ' = ' . $db->q($user->id));
 		$cid = $db->setQuery($q)->loadColumn() ?? [];
 
-		$q = $db->getQuery(true)
+		$q = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->update($db->qn('#__engage_comments'))
 			->set($db->qn('body') . ' = ' . $db->q(Text::_('COM_ENGAGE_COMMENTS_LBL_DELETEDCOMMENT')))
 			->where($db->qn('created_by') . ' = ' . $db->q($user->id));
@@ -300,13 +300,13 @@ final class Meta
 
 		// Nuke comments attributed to the user's email address
 		$uri = Uri::getInstance();
-		$q   = $db->getQuery(true)
+		$q   = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select($db->qn('id'))
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('email') . ' = ' . $db->q($user->email));
 		$cid = array_merge($cid, $db->setQuery($q)->loadColumn() ?? []);
 
-		$q = $db->getQuery(true)
+		$q = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->update($db->qn('#__engage_comments'))
 			->set([
 				$db->qn('body') . ' = ' . $db->q(Text::_('COM_ENGAGE_COMMENTS_LBL_DELETEDCOMMENT')),
@@ -322,7 +322,7 @@ final class Meta
 		 */
 		if ($convertToGuest && !empty($cid))
 		{
-			$q = $db->getQuery(true)
+			$q = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 				->update($db->qn('#__engage_comments'))
 				->set([
 					$db->qn('body') . ' = ' . $db->q(Text::_('COM_ENGAGE_COMMENTS_LBL_DELETEDCOMMENT')),
@@ -339,7 +339,7 @@ final class Meta
 		}
 
 		// Remove #__engage_unsubscribe records
-		$q = $db->getQuery(true)
+		$q = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->delete($db->qn('#__engage_unsubscribe'))
 			->where($db->qn('email') . ' = ' . $db->q($user->email));
 		$db->setQuery($q)->execute();

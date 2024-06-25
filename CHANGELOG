@@ -1,4 +1,8 @@
 <?php die(); ?>
+Akeeba Engage 3.3.6
+================================================================================
+~ Support for Joomla! 5.1's createQuery method in the db object
+
 Akeeba Engage 3.3.5
 ================================================================================
 # [LOW] Gravatar plugin always uses Mystery Person as the default image

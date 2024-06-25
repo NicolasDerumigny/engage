@@ -248,7 +248,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		// Run a simple update query to let the user own the comments
 		$db = $this->getDatabase();
 
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->update($db->qn('#__engage_comments'))
 			->set([
 				$db->qn('name') . ' = NULL',

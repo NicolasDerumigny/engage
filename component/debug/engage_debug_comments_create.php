@@ -408,7 +408,7 @@ class EngageDebugCommentsCreate extends FOFApplicationCLI
 		$faker      = FakerFactory::create();
 		$limitStart = 0;
 		$db         = $this->container->db;
-		$query      = $db->getQuery(true)->select('*')->from($db->qn('#__engage_temp_info'))->order(
+		$query      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))->select('*')->from($db->qn('#__engage_temp_info'))->order(
 			$db->qn('date') . ' ASC'
 		);
 
@@ -439,7 +439,7 @@ class EngageDebugCommentsCreate extends FOFApplicationCLI
 				if (substr($info['parent_id'], 0, 1) === '@')
 				{
 					$parentUUID        = substr($info['parent_id'], 1);
-					$infoQ             = $db->getQuery(true)
+					$infoQ             = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 						->select($db->qn('id'))
 						->from('#__engage_temp_info')
 						->where($db->qn('uuid') . ' = ' . $db->q($parentUUID));
@@ -529,7 +529,7 @@ class EngageDebugCommentsCreate extends FOFApplicationCLI
 	private function getArticleAssetIDs(): array
 	{
 		$db    = $this->container->db;
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([$db->qn('asset_id')])
 			->from($db->qn('#__content'))
 			->where($db->qn('state') . ' = ' . $db->q(1));
@@ -547,7 +547,7 @@ class EngageDebugCommentsCreate extends FOFApplicationCLI
 	private function getArticleCreatedByAssetId(int $assetID): int
 	{
 		$db    = Factory::getDbo();
-		$query = $db->getQuery(true)
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([$db->qn('created')])
 			->from($db->qn('#__content'))
 			->where($db->qn('asset_id') . ' = ' . $db->q($assetID));
@@ -617,7 +617,7 @@ class EngageDebugCommentsCreate extends FOFApplicationCLI
 
 		// Get all groups
 		$db     = $this->container->db;
-		$q      = $db->getQuery(true)
+		$q      = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select([$db->qn('id')])
 			->from($db->qn('#__usergroups'));
 		$groups = $db->setQuery($q)->loadColumn();

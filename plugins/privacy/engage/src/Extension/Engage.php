@@ -84,7 +84,7 @@ class Engage extends PrivacyPlugin implements SubscriberInterface
 
 		// #__engage_comments by created_by
 
-		$selectQuery = $db->getQuery(true)
+		$selectQuery = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select('*')
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('created_by') . ' = ' . $db->q($user->id));
@@ -98,7 +98,7 @@ class Engage extends PrivacyPlugin implements SubscriberInterface
 		}
 
 		// #__engage_comments by email
-		$selectQuery = $db->getQuery(true)
+		$selectQuery = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
 			->select('*')
 			->from($db->qn('#__engage_comments'))
 			->where($db->qn('email') . ' = ' . $db->q($user->email));
