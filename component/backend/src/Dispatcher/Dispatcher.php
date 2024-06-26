@@ -198,6 +198,11 @@ class Dispatcher extends ComponentDispatcher
 					break;
 			}
 		}
+
+		if (version_compare(JVERSION, '4.99999.99999', 'gt'))
+		{
+			$webAssetManager->useStyle('com_engage.j5');
+		}
 	}
 
 	/**

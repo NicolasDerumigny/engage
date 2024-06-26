@@ -13,6 +13,13 @@
 		},
 
 		{
+			"name": "com_engage.j5",
+			"description": "CSS for backend pages on Joomla! 5",
+			"type": "style",
+			"uri": "com_engage/j5.css"
+		},
+
+		{
 			"name": "com_engage.comments",
 			"description": "CSS for the comments in the frontend",
 			"type": "style",
