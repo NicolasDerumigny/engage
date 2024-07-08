@@ -593,7 +593,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	private function cacheArticleRow($row, bool $loadParameters, bool $force = false): void
 	{
 		$authorUser = UserFetcher::getUser($row->created_by);
-		$metaKey    = md5($row->asset_id . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
+		$metaKey    = hash('md5', $row->asset_id . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
 
 		if (array_key_exists($metaKey, $this->cachedArticles) && !empty($this->cachedArticles[$metaKey]) && !$force)
 		{
@@ -639,8 +639,8 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return null;
 		}
 
-		$metaKey    = md5($assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
-		$altMetaKey = md5($assetId . '_with_parameters');
+		$metaKey    = hash('md5', $assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
+		$altMetaKey = hash('md5', $assetId . '_with_parameters');
 
 		if (isset($this->cachedArticles[$metaKey]))
 		{

@@ -133,7 +133,7 @@ class UserFetcher
 	 */
 	public static function getUserIdByEmail(string $email): ?int
 	{
-		$key = md5(strtolower(MailHelper::cleanLine($email)));
+		$key = hash('md5', strtolower(MailHelper::cleanLine($email)));
 
 		if (array_key_exists($key, self::$emailToIdCache))
 		{

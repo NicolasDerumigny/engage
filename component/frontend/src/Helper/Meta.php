@@ -136,8 +136,8 @@ final class Meta
 	 */
 	public static function getAssetAccessMeta(int $assetId = 0, bool $loadParameters = false): array
 	{
-		$metaKey    = md5($assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
-		$altMetaKey = md5($assetId . '_with_parameters');
+		$metaKey    = hash('md5', $assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
+		$altMetaKey = hash('md5', $assetId . '_with_parameters');
 
 		if (array_key_exists($metaKey, self::$cachedMeta))
 		{

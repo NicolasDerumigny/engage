@@ -63,7 +63,7 @@ class Gravatar extends CMSPlugin implements SubscriberInterface
 
 		$hash   = function_exists('hash') && function_exists('hash_algos') && in_array('sha256', hash_algos())
 			? hash('sha256', strtolower(trim($user->email)))
-			: md5(strtolower(trim($user->email)));
+			: hash('md5', strtolower(trim($user->email)));
 		$rating = $this->params->get('rating', 'g');
 		$url    = 'https://www.gravatar.com/avatar/' . $hash . '?s=' . ($size ?? 48) . '&r=' . $rating;
 
@@ -120,7 +120,7 @@ class Gravatar extends CMSPlugin implements SubscriberInterface
 		{
 			$hash = function_exists('hash') && function_exists('hash_algos') && in_array('sha256', hash_algos())
 				? hash('sha256', strtolower(trim($user->email)))
-				: md5(strtolower(trim($user->email)));
+				: hash('md5', strtolower(trim($user->email)));
 
 			$url = 'https://www.gravatar.com/' . $hash;
 		}
