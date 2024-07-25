@@ -5,14 +5,8 @@
   ~ @license   GNU General Public License version 3, or later
   -->
 
-<!--
-	Akeeba Engage build file for Phing
-	written by Nicholas K. Dionysopoulos
-
-	Run "phing git" from the build directory to build everything except the docs
--->
 <project name="AkeebaEngage" description="Akeeba Engage" default="git">
-    <import file="${phing.dir}/../../buildfiles/phing/common.xml"/>
+    <import file="${phing.dir}/../buildfiles/phing/common.xml"/>
 
     <!--
     ====================================================================================================
@@ -74,23 +68,4 @@
         <include name="*.txt"/>
         <include name="script.*.php"/>
     </fileset>
-
-    <fileset dir="${dirs.component}/cli" id="cli">
-        <include name="*.php"/>
-        <include name="file_engage.xml"/>
-    </fileset>
-
-    <!--
-	====================================================================================================
-	Obsolete
-	====================================================================================================
-	-->
-
-    <target name="docsdeploy">
-        <echo message="The docsdeploy target is obsolete. The documentation is now in the wiki" />
-    </target>
-
-    <target name="documentation" description="The documentation">
-        <echo message="The documentation target is obsolete. The documentation is now in the wiki" />
-    </target>
 </project>
