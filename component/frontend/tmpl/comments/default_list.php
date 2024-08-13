@@ -76,6 +76,24 @@ $isModified    = !empty($comment->modified_by) && !empty($comment->modified) && 
 			($comment->modified != $comment->created)
 		)
 	);
+
+if ($isModified)
+{
+	if ($comment->modified_by == $comment->created_by)
+	{
+		// If the comment is modified by the created by user, use the public name determined at the top of the file.
+		$modifiedBy = $user->name;
+	}
+	else
+	{
+		// Someone else modified the comment. Use their name.
+		$modifiedUser = UserFetcher::getUser($comment->modified_by);
+		// If the user is no longer available, use '???'
+		$modifiedBy   = ($modifiedUser === null || $modifiedUser->guest) ? Text::_('COM_ENGAGE_LBL_COMMENT_MODIFIED_NO_LONGER_AVAILABLE') : $modifiedUser->name;
+	}
+
+}
+
 $openListItem++;
 $this->ensureHasParentInfo($comment, $parentIds, $parentNames);
 $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->enabled == -3) ? 'warning' : 'danger')
@@ -232,7 +250,7 @@ $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->ena
 			<?= HTMLHelper::_('engage.processCommentTextForDisplay', $comment->body) ?>
 			<?php if ($isModified): ?>
 			<div class="my-2 border-top border-1 border-muted text-muted small">
-				<?= Text::sprintf('COM_ENGAGE_LBL_COMMENT_MODIFIED', Factory::getDate($comment->modified)->setTimezone($this->userTimezone)->format(Text::_('DATE_FORMAT_LC2'), true), $comment->name ?: UserFetcher::getUser($comment->modified_by)->name) ?>
+				<?= Text::sprintf('COM_ENGAGE_LBL_COMMENT_MODIFIED', Factory::getDate($comment->modified)->setTimezone($this->userTimezone)->format(Text::_('DATE_FORMAT_LC2'), true), $modifiedBy) ?>
 			</div>
 			<?php endif; ?>
 		</div>
