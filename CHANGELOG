@@ -5,6 +5,7 @@ Akeeba Engage 3.3.6
 ~ Workaround for Joomla! 5.1 CSS in alert DIVs
 ~ PHP 8.4 compatibility: MD5 and SHA-1 functions are deprecated
 # [LOW] Modified By may print the wrong username for guest comments [gh-322]
+# [LOW] The Engage cache plugin would load in the backend and CLI where it's not relevant
 
 Akeeba Engage 3.3.5
 ================================================================================

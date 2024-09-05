@@ -57,6 +57,11 @@ class Engagecache extends CMSPlugin implements SubscriberInterface
 	{
 		$app = $this->getApplication();
 
+		if (!$app->isClient('site'))
+		{
+			return;
+		}
+
 		if ($app->input->getCmd('option') !== 'com_content')
 		{
 			return;
@@ -89,6 +94,13 @@ class Engagecache extends CMSPlugin implements SubscriberInterface
 	 */
 	public function onBeforeRender(Event $event)
 	{
+		$app = $this->getApplication();
+
+		if (!$app->isClient('site'))
+		{
+			return;
+		}
+
 		// When caching is enabled Joomla does not call the events which allow for these lang strings to be included.
 		$language = $this->getApplication()->getLanguage();
 		$language->load('com_engage', JPATH_SITE);
