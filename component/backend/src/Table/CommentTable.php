@@ -137,6 +137,7 @@ class CommentTable extends AbstractTable
 
 		while (true)
 		{
+			$commentsModel->clearCache();
 			$commentsSlice = $commentsModel->getItems();
 
 			if (empty($commentsSlice))
