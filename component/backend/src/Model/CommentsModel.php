@@ -630,5 +630,9 @@ class CommentsModel extends ListModel
 		return parent::getStoreId($id);
 	}
 
+	public function clearCache($id = '')
+	{
+		unset($this->cache[$this->getStoreId($id)]);
+	}
 
 }
