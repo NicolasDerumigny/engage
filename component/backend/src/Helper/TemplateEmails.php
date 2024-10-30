@@ -9,6 +9,7 @@ namespace Akeeba\Component\Engage\Administrator\Helper;
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Mail\Mail;
 use Joomla\CMS\Mail\MailTemplate;
@@ -327,7 +328,15 @@ abstract class TemplateEmails
 				return false;
 			}
 
-			$templateMailer = new MailTemplate($key, $langTag, $mailer);
+			if (ComponentHelper::getParams('com_engage')->get('workaround_mailtemplate', 1))
+			{
+				$templateMailer = MailTemplateHotFix::getAWorkingMailTemplate($key, $langTag, $mailer);
+			}
+			else
+			{
+				$templateMailer = new MailTemplate($key, $langTag, $mailer);
+			}
+
 			$templateMailer->addTemplateData($data);
 			$templateMailer->addRecipient(trim($user->email), $user->name);
 

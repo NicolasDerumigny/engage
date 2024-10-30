@@ -320,6 +320,17 @@
             label="COM_ENGAGE_CONFIG_ADVANCED_FIELDSET_LABEL"
             description="COM_ENGAGE_CONFIG_ADVANCED_FIELDSET_DESC"
     >
+        <field name="workaround_mailtemplate"
+               type="radio"
+               label="COM_ENGAGE_CONFIG_WORKAROUND_MAILTEMPLATE_LABEL"
+               description="COM_ENGAGE_CONFIG_WORKAROUND_MAILTEMPLATE_DESC"
+               default="1"
+               layout="joomla.form.field.radio.switcher"
+        >
+            <option value="0">JNo</option>
+            <option value="1">JYes</option>
+        </field>
+
         <field
                 name="login_module"
                 type="ModulesModule"
