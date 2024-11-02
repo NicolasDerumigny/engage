@@ -155,7 +155,9 @@ class Engage extends ActionLogPlugin implements SubscriberInterface
 		/** @var   CommentTable $comment */
 		[$comment] = array_values($event->getArguments());
 
-		if ($this->getApplication()->getIdentity()->guest)
+		$user = $this->getApplication()->getIdentity();
+
+		if (!$user || $user->guest)
 		{
 			return;
 		}
