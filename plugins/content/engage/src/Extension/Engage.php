@@ -25,6 +25,7 @@ use Joomla\CMS\Dispatcher\ComponentDispatcherFactory;
 use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\Helper\TagsHelper;
 use Joomla\CMS\MVC\Factory\MVCFactory;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -35,6 +36,8 @@ use Joomla\CMS\Table\Table;
 use Joomla\Component\Categories\Administrator\Model\CategoryModel;
 use Joomla\Component\Content\Administrator\Model\ArticleModel;
 use Joomla\Database\DatabaseAwareTrait;
+use Joomla\Database\DatabaseQuery;
+use Joomla\Database\ParameterType;
 use Joomla\Event\DispatcherInterface;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -593,7 +596,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	private function cacheArticleRow($row, bool $loadParameters, bool $force = false): void
 	{
 		$authorUser = UserFetcher::getUser($row->created_by);
-		$metaKey    = hash('md5', $row->asset_id . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
+		$metaKey    = $row->asset_id;
 
 		if (array_key_exists($metaKey, $this->cachedArticles) && !empty($this->cachedArticles[$metaKey]) && !$force)
 		{
@@ -639,60 +642,14 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return null;
 		}
 
-		$metaKey    = hash('md5', $assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
-		$altMetaKey = hash('md5', $assetId . '_with_parameters');
-
-		if (isset($this->cachedArticles[$metaKey]))
+		if (isset($this->cachedArticles[$assetId]))
 		{
-			return $this->cachedArticles[$metaKey];
+			return $this->cachedArticles[$assetId];
 		}
 
-		if (isset($this->cachedArticles[$altMetaKey]))
-		{
-			return $this->cachedArticles[$altMetaKey];
-		}
+		$this->cachedArticles[$assetId] = null;
 
-		$this->cachedArticles[$metaKey] = null;
-
-		$db    = $this->getDatabase();
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
-			->select([
-				$db->qn('id'),
-			])
-			->from($db->qn('#__content'))
-			->where($db->qn('asset_id') . ' = ' . $db->q($assetId));
-		try
-		{
-			$articleId = $db->setQuery($query)->loadResult();
-		}
-		catch (Exception $e)
-		{
-			$articleId = null;
-		}
-
-		if (is_null($articleId))
-		{
-			return null;
-		}
-
-		try
-		{
-			/** @var MVCFactoryInterface $factory */
-			$factory = $this->getApplication()->bootComponent('com_content')->getMVCFactory();
-			/** @var ArticleModel $model */
-			$model = $factory->createModel('Article', 'Administrator');
-
-			$row = $model->getItem($articleId);
-		}
-		catch (Exception $e)
-		{
-			$row = null;
-		}
-
-		if (is_null($row) || ($row === false) || is_object($row) && ($row instanceof Throwable))
-		{
-			return null;
-		}
+		$row = $this->loadArticleObject($assetId);
 
 		if (!is_object($row))
 		{
@@ -702,7 +659,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		$this->cacheArticleRow($row, $loadParameters);
 
 		/** @noinspection PhpExpressionAlwaysNullInspection */
-		return $this->cachedArticles[$metaKey];
+		return $this->cachedArticles[$assetId];
 	}
 
 	/**
@@ -1272,4 +1229,61 @@ HTML;
 		return $comments;
 	}
 
+	/**
+	 * Loads an article (`#__content`) object given an article's asset ID.
+	 *
+	 * We are no longer going through com_content's ArticleModel because it does not work at all under CLI because the
+	 * constructor of Workflow requires a CMSApplication object. The CliApplication implements CMSApplicationInterface,
+	 * but doesn't extend from CMSApplication. This caused Engage to break under CLI. Using direct access to the DB
+	 * table sidesteps this issue. After all, we only need very basic information about the article to begin with.
+	 *
+	 * @param   int  $assetId  The article's asset ID
+	 *
+	 * @return  object|mixed|null
+	 * @since   3.3.7
+	 */
+	private function loadArticleObject(int $assetId): ?object
+	{
+		$db = $this->getDatabase();
+		/** @var DatabaseQuery $query */
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
+		$query
+			->select('*')
+			->from($db->qn('#__content'))
+			->where($db->qn('asset_id') . ' = ' . $db->q($assetId));
+
+		try
+		{
+			$item = $db->setQuery($query)->loadObject();
+		}
+		catch (Exception $e)
+		{
+			return null;
+		}
+
+		if (!is_object($item))
+		{
+			return null;
+		}
+
+		// Convert the params field to an array.
+		$registry      = new Registry($item->attribs);
+		$item->attribs = $registry->toArray();
+
+		// Convert the metadata field to an array.
+		$registry       = new Registry($item->metadata);
+		$item->metadata = $registry->toArray();
+
+		// Convert the images field to an array.
+		$registry     = new Registry($item->images);
+		$item->images = $registry->toArray();
+
+		// Convert the urls field to an array.
+		$registry   = new Registry($item->urls);
+		$item->urls = $registry->toArray();
+
+		$item->articletext = ($item->fulltext !== null && trim($item->fulltext) != '') ? $item->introtext . '<hr id="system-readmore">' . $item->fulltext : $item->introtext;
+
+		return $item;
+	}
 }
