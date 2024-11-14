@@ -3,6 +3,7 @@ Akeeba Engage 3.3.7
 ================================================================================
 ~ No longer using ArticleModel, replaced with direct DB access
 # [LOW] User Action Log plugin throws notice if there is no current user (only happens in testing)
+# [LOW] Typo in MailTemplateHotFix
 
 Akeeba Engage 3.3.6
 ================================================================================
