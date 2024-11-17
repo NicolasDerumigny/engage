@@ -54,6 +54,7 @@ class CommentsModel extends ListModel
 				// Sortable and/or filter columns
 				'id', 'asset_id', 'name', 'email', 'ip', 'user_agent', 'enabled',
 				'created', 'created_by', 'modified', 'modified_by',
+				'categories_include', 'categories_exclude',
 				// Sort–only fields
 				'c.id', 'user_name', 'c.enabled', 'c.created',
 				// Filter–only fields
@@ -62,19 +63,22 @@ class CommentsModel extends ListModel
 
 		parent::__construct($config, $factory);
 
-		$this->setupStateFilters([
-			// Visible filters
-			'search'     => 'string',
-			'from'       => 'string',
-			'to'         => 'string',
-			'created_by' => 'int',
-			'enabled'    => 'int',
+		$this->setupStateFilters(
+			[
+				// Visible filters
+				'search'             => 'string',
+				'from'               => 'string',
+				'to'                 => 'string',
+				'created_by'         => 'int',
+				'enabled'            => 'int',
+				'categories_include' => 'array',
+				'categories_exclude' => 'array',
 
-			// Internal filters
-			'asset_id'   => 'int',
-			'parent_id'  => 'int',
-			'frontend'   => 'int',
-		], 'c.created', 'DESC');
+				// Internal filters
+				'asset_id'           => 'int',
+				'parent_id'          => 'int',
+				'frontend'           => 'int',
+			], 'c.created', 'DESC');
 	}
 
 	/**
@@ -420,6 +424,22 @@ class CommentsModel extends ListModel
 				->where($db->quoteName('a.state') . ' = 1')
 				->whereIn($db->quoteName('a.access'), $userAccess, ParameterType::INTEGER)
 				->whereIn($db->quoteName('cat.access'), $userAccess, ParameterType::INTEGER);
+		}
+
+		// Include Categories Filter
+		$fltCatInclude = $this->getState('filter.categories_include', []);
+
+		if (is_array($fltCatInclude) && !empty($fltCatInclude))
+		{
+			$query->whereIn($db->quoteName('cat.id'), $fltCatInclude);
+		}
+
+		// Exclude Categories Filter
+		$fltCatExclude = $this->getState('filter.categories_exclude', []);
+
+		if (is_array($fltCatExclude) && !empty($fltCatExclude))
+		{
+			$query->whereNotIn($db->quoteName('cat.id'), $fltCatExclude);
 		}
 
 		// Asset ID filter

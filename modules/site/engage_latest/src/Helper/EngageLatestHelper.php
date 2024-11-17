@@ -24,7 +24,7 @@ defined('_JEXEC') or die;
 
 class EngageLatestHelper
 {
-	public function getLatestComments(int $numComments = 10, int $maxWords = 30): array
+	public function getLatestComments(int $numComments = 10, bool $catInclude = false, array $categories = []): array
 	{
 		if (!$this->hasEngage())
 		{
@@ -43,6 +43,11 @@ class EngageLatestHelper
 		$model->setState('list.direction', 'DESC');
 		$model->setState('list.start', 0);
 		$model->setState('list.limit', $numComments);
+
+		if (!empty($categories))
+		{
+			$model->setState(($catInclude ? 'filter.categories_include' : 'filter.categories_exclude'), $categories);
+		}
 
 		return $model->getItems();
 	}

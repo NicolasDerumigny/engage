@@ -115,6 +115,30 @@
 						showon="excerpt:1"
 				/>
 
+				<field
+						name="cat_mode"
+						type="radio"
+						layout="joomla.form.field.radio.switcher"
+						label="MOD_ENGAGE_LATEST_FIELD_CAT_MODE_LABEL"
+						description="MOD_ENGAGE_LATEST_FIELD_CAT_MODE_DESC"
+						default="0"
+				>
+					<option value="0">MOD_ENGAGE_LATEST_FIELD_CAT_MODE_OPT_EXCLUDE</option>
+					<option value="1">MOD_ENGAGE_LATEST_FIELD_CAT_MODE_OPT_INCLUDE</option>
+				</field>
+
+				<field
+						name="categories"
+						type="category"
+						label="MOD_ENGAGE_LATEST_FIELD_CATEGORIES_LABEL"
+						description="MOD_ENGAGE_LATEST_FIELD_CATEGORIES_DESC"
+						extension="com_content"
+						multiple="true"
+						filter="intarray"
+						layout="joomla.form.field.list-fancy-select"
+						default=""
+				/>
+
 			</fieldset>
 			<fieldset name="advanced">
 				<field
