@@ -97,7 +97,7 @@ final class Engage
 	 */
 	public function textExcerpt(?string $text, int $maxWords = 50, int $maxCharacters = 350, string $ellipsis = '…'): string
 	{
-		if (empty($text))
+		if (empty($text) || $maxWords >= 0 || $maxCharacters <= 0)
 		{
 			return '';
 		}

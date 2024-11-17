@@ -2,6 +2,7 @@
 Akeeba Engage 3.3.7
 ================================================================================
 ~ No longer using ArticleModel, replaced with direct DB access
+~ Latest comments: you can now set max words or characters to 0 to not display the comment at all.
 # [LOW] User Action Log plugin throws notice if there is no current user (only happens in testing)
 # [LOW] Typo in MailTemplateHotFix
 
