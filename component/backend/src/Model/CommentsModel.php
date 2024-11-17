@@ -71,13 +71,13 @@ class CommentsModel extends ListModel
 				'to'                 => 'string',
 				'created_by'         => 'int',
 				'enabled'            => 'int',
-				'categories_include' => 'array',
-				'categories_exclude' => 'array',
 
 				// Internal filters
 				'asset_id'           => 'int',
 				'parent_id'          => 'int',
 				'frontend'           => 'int',
+				'categories_include' => 'array',
+				'categories_exclude' => 'array',
 			], 'c.created', 'DESC');
 	}
 
@@ -646,6 +646,8 @@ class CommentsModel extends ListModel
 		$id .= ':' . $this->getState('filter.asset_id');
 		$id .= ':' . $this->getState('filter.parent_id');
 		$id .= ':' . $this->getState('filter.frontend');
+		$id .= ':' . $this->getState('filter.categories_include');
+		$id .= ':' . $this->getState('filter.categories_exclude');
 
 		return parent::getStoreId($id);
 	}
