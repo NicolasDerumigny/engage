@@ -68,8 +68,6 @@ endif;
 
 		$commentUri->setFragment('akengage-comment-' . $comment->id);
 		$commentUri->setVar('akengage_cid', $comment->id);
-
-		$commentsUri->setFragment('akengage-comments-section');
 		?>
 		<li class="engage-latest-list-item list-group-item d-flex flex-column mb-2">
 			<?php if ($show_title): ?>
