@@ -41,6 +41,17 @@
 		<fields name="params">
 			<fieldset name="basic">
 				<field
+						name="mode"
+						type="list"
+						label="MOD_ENGAGE_LATEST_FIELD_MODE_LABEL"
+						description="MOD_ENGAGE_LATEST_FIELD_MODE_DESC"
+						default="comments"
+				>
+					<option value="comments">MOD_ENGAGE_LATEST_FIELD_MODE_COMMENTS</option>
+					<option value="articles">MOD_ENGAGE_LATEST_FIELD_MODE_ARTICLES</option>
+				</field>
+
+				<field
 						name="count"
 						type="number"
 						label="MOD_ENGAGE_LATEST_FIELD_COUNT_LABEL"

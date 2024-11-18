@@ -52,10 +52,11 @@ class Dispatcher extends AbstractModuleDispatcher
 		$catModeInclude = (int) $params->get('cat_mode', 0) === 1;
 		$categories     = $params->get('categories', []);
 		$categories     = is_array($categories) ? $categories : [];
+		$mode           = $params->get('mode', 'comments');
 
 		return array_merge(parent::getLayoutData(), [
 			'hasEngage'          => $hasEngage,
-			'comments'           => $helper->getLatestComments($count, $catModeInclude, $categories),
+			'comments'           => $helper->getLatestComments($count, $mode, $catModeInclude, $categories),
 			'show_title'         => (int) ($params->get('show_title', 1)) === 1,
 			'link_title'         => (int) ($params->get('link_title', 0)) === 1,
 			'show_count'         => (int) ($params->get('show_count', 1)) === 1,

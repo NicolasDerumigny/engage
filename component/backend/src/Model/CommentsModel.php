@@ -646,8 +646,8 @@ class CommentsModel extends ListModel
 		$id .= ':' . $this->getState('filter.asset_id');
 		$id .= ':' . $this->getState('filter.parent_id');
 		$id .= ':' . $this->getState('filter.frontend');
-		$id .= ':' . $this->getState('filter.categories_include');
-		$id .= ':' . $this->getState('filter.categories_exclude');
+		$id .= ':' . serialize($this->getState('filter.categories_include'));
+		$id .= ':' . serialize($this->getState('filter.categories_exclude'));
 
 		return parent::getStoreId($id);
 	}
@@ -657,4 +657,76 @@ class CommentsModel extends ListModel
 		unset($this->cache[$this->getStoreId($id)]);
 	}
 
+	/**
+	 * Get the latest commented articles, with their corresponding latest comment's information.
+	 *
+	 * @param   int  $numArticles  Up to how many articles to return
+	 *
+	 * @return  array
+	 * @since   3.4.0
+	 */
+	public function getLatestArticles(int $numArticles = 10): array
+	{
+		$db = $this->getDatabase();
+		/** @var DatabaseQuery $query */
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
+		$query->select('DISTINCT ' . $db->quoteName('c.asset_id'))
+			->from($db->quoteName('#__engage_comments', 'c'))
+			->join('LEFT', $db->quoteName('#__content', 'a'),
+				$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
+			)
+			->order($db->quoteName('c.created') . ' DESC')
+			->setLimit($numArticles, 0);
+
+		// Include Categories Filter
+		$fltCatInclude = $this->getState('filter.categories_include', []);
+
+		if (is_array($fltCatInclude) && !empty($fltCatInclude))
+		{
+			$query->whereIn($db->quoteName('a.catid'), $fltCatInclude);
+		}
+
+		// Exclude Categories Filter
+		$fltCatExclude = $this->getState('filter.categories_exclude', []);
+
+		if (is_array($fltCatExclude) && !empty($fltCatExclude))
+		{
+			$query->whereNotIn($db->quoteName('a.catid'), $fltCatExclude);
+		}
+
+		try
+		{
+			$assetIds = $db->setQuery($query)->loadColumn();
+		}
+		catch (Exception $e)
+		{
+			return [];
+		}
+
+		if (empty($assetIds))
+		{
+			return [];
+		}
+
+		$stashAssetId = $this->getState('filter.asset_id');
+		$stashStart   = $this->getState('list.start');
+		$stashLimit   = $this->getState('list.limit');
+
+		$ret = [];
+
+		foreach ($assetIds as $assetId)
+		{
+			$this->setState('filter.asset_id', $assetId);
+			$this->setState('list.start', 0);
+            $this->setState('list.limit', 1);
+
+			$ret = array_merge($ret, $this->getItems() ?: []);
+		}
+
+		$this->setState('filter.asset_id', $stashAssetId);
+		$this->setState('list.start', $stashStart);
+		$this->setState('list.limit', $stashLimit);
+
+		return $ret;
+	}
 }
