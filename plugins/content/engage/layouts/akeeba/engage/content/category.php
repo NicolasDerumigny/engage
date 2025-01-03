@@ -30,6 +30,7 @@ extract($displayData);
 
 // Get the number of comments for this article
 $model->setState('filter.asset_id', $row->asset_id);
+$model->setState('filter.enabled', 1);
 $numComments = $model->getTotal();
 
 // Language key to use

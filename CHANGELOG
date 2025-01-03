@@ -8,6 +8,7 @@ Akeeba Engage 3.4.0
 # [LOW] User Action Log plugin throws notice if there is no current user (only happens in testing)
 # [LOW] Typo in MailTemplateHotFix
 # [LOW] Latest Comments: took you to comments section, not specific comment
+# [LOW] Category comment count includes unpublished comments
 
 Akeeba Engage 3.3.6
 ================================================================================
