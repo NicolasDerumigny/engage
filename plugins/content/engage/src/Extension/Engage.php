@@ -25,7 +25,6 @@ use Joomla\CMS\Dispatcher\ComponentDispatcherFactory;
 use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
-use Joomla\CMS\Helper\TagsHelper;
 use Joomla\CMS\MVC\Factory\MVCFactory;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
@@ -34,10 +33,8 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Content;
 use Joomla\CMS\Table\Table;
 use Joomla\Component\Categories\Administrator\Model\CategoryModel;
-use Joomla\Component\Content\Administrator\Model\ArticleModel;
 use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Database\DatabaseQuery;
-use Joomla\Database\ParameterType;
 use Joomla\Event\DispatcherInterface;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -596,7 +593,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	private function cacheArticleRow($row, bool $loadParameters, bool $force = false): void
 	{
 		$authorUser = UserFetcher::getUser($row->created_by);
-		$metaKey    = $row->asset_id;
+		$metaKey    = hash('md5', $row->asset_id . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
 
 		if (array_key_exists($metaKey, $this->cachedArticles) && !empty($this->cachedArticles[$metaKey]) && !$force)
 		{
@@ -642,12 +639,20 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return null;
 		}
 
-		if (isset($this->cachedArticles[$assetId]))
+		$metaKey    = hash('md5', $assetId . '_' . ($loadParameters ? 'with' : 'without') . '_parameters');
+		$altMetaKey = hash('md5', $assetId . '_with_parameters');
+
+		if (isset($this->cachedArticles[$metaKey]))
 		{
-			return $this->cachedArticles[$assetId];
+			return $this->cachedArticles[$metaKey];
 		}
 
-		$this->cachedArticles[$assetId] = null;
+		if (isset($this->cachedArticles[$altMetaKey]))
+		{
+			return $this->cachedArticles[$altMetaKey];
+		}
+
+		$this->cachedArticles[$metaKey] = null;
 
 		$row = $this->loadArticleObject($assetId);
 
@@ -658,7 +663,6 @@ class Engage extends CMSPlugin implements SubscriberInterface
 
 		$this->cacheArticleRow($row, $loadParameters);
 
-		/** @noinspection PhpExpressionAlwaysNullInspection */
 		return $this->cachedArticles[$assetId];
 	}
 
