@@ -663,7 +663,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 
 		$this->cacheArticleRow($row, $loadParameters);
 
-		return $this->cachedArticles[$assetId];
+		return $this->cachedArticles[$metaKey];
 	}
 
 	/**
