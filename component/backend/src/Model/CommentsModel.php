@@ -30,36 +30,54 @@ class CommentsModel extends ListModel
 {
 	use ModelPopulateStateTrait;
 
+	private const CONJOINED = 1;
+
 	/**
 	 * The number of tree-aware comments fetched by commentIDTreeSliceWithDepth
 	 *
 	 * @var   int
-	 * @see   self::commentIDTreeSliceWithDepth
 	 * @since 1.0.0
+	 * @see   self::commentIDTreeSliceWithDepth
 	 */
 	private $treeAwareCount = null;
 
 	/**
 	 * Constructor
 	 *
-	 * @param   array                $config   An array of configuration options (name, state, dbo, table_path, ignore_request).
+	 * @param   array                $config   An array of configuration options (name, state, dbo, table_path,
+	 *                                         ignore_request).
 	 * @param   MVCFactoryInterface  $factory  The factory.
 	 *
-	 * @since   3.0.0
 	 * @throws  Exception
+	 * @since   3.0.0
 	 */
 	public function __construct($config = [], MVCFactoryInterface $factory = null)
 	{
 		$config['filter_fields'] = $config['filter_fields'] ?? [
-				// Sortable and/or filter columns
-				'id', 'asset_id', 'name', 'email', 'ip', 'user_agent', 'enabled',
-				'created', 'created_by', 'modified', 'modified_by',
-				'categories_include', 'categories_exclude',
-				// Sort–only fields
-				'c.id', 'user_name', 'c.enabled', 'c.created',
-				// Filter–only fields
-				'search', 'from', 'to',
-			];
+			// Sortable and/or filter columns
+			'id',
+			'asset_id',
+			'name',
+			'email',
+			'ip',
+			'user_agent',
+			'enabled',
+			'created',
+			'created_by',
+			'modified',
+			'modified_by',
+			'categories_include',
+			'categories_exclude',
+			// Sort–only fields
+			'c.id',
+			'user_name',
+			'c.enabled',
+			'c.created',
+			// Filter–only fields
+			'search',
+			'from',
+			'to',
+		];
 
 		parent::__construct($config, $factory);
 
@@ -78,7 +96,8 @@ class CommentsModel extends ListModel
 				'frontend'           => 'int',
 				'categories_include' => 'array',
 				'categories_exclude' => 'array',
-			], 'c.created', 'DESC');
+			], 'c.created', 'DESC'
+		);
 	}
 
 	/**
@@ -122,7 +141,7 @@ class CommentsModel extends ListModel
 		}
 
 		// Get the comments with the IDs specified. They are NOT in order.
-		$db = $this->getDatabase();
+		$db    = $this->getDatabase();
 		$query = $this->getListQuery()
 			->whereIn($db->quoteName('c.id'), array_map('trim', array_keys($idsAndDepth)))
 			->clear('order');
@@ -213,10 +232,12 @@ class CommentsModel extends ListModel
 		$db     = $this->getDatabase();
 		$query  = $this->getListQuery(true)
 			->clear('select')
-			->select([
-				$db->qn('c.id'),
-				$db->qn('c.parent_id'),
-			]);
+			->select(
+				[
+					$db->qn('c.id'),
+					$db->qn('c.parent_id'),
+				]
+			);
 		$allIDs = $db->setQuery($query)->loadAssocList('id') ?? [];
 
 		$this->treeAwareCount = 0;
@@ -228,16 +249,20 @@ class CommentsModel extends ListModel
 		}
 
 		// Convert into an ID => parent array
-		$allIDs = array_map(function ($x) {
-			return $x['parent_id'] ?: null;
-		}, $allIDs);
+		$allIDs = array_map(
+			function ($x) {
+				return $x['parent_id'] ?: null;
+			}, $allIDs
+		);
 
 		$this->treeAwareCount = count($allIDs);
 
 		// Filter out orphan nodes (children of deleted or unpublished comments)
-		$allIDs = array_filter($allIDs, function ($parent_id) use ($allIDs) {
+		$allIDs = array_filter(
+			$allIDs, function ($parent_id) use ($allIDs) {
 			return is_null($parent_id) || array_key_exists($parent_id, $allIDs);
-		});
+		}
+		);
 
 		/**
 		 * Create a tree version of the comments and flatten it out
@@ -256,6 +281,85 @@ class CommentsModel extends ListModel
 		return array_slice($flattened, $start, null, true);
 	}
 
+	public function clearCache($id = '')
+	{
+		unset($this->cache[$this->getStoreId($id)]);
+	}
+
+	/**
+	 * Get the latest commented articles, with their corresponding latest comment's information.
+	 *
+	 * @param   int  $numArticles  Up to how many articles to return
+	 *
+	 * @return  array
+	 * @since   3.4.0
+	 */
+	public function getLatestArticles(int $numArticles = 10): array
+	{
+		$db = $this->getDatabase();
+		/** @var DatabaseQuery $query */
+		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
+		$query->select('DISTINCT ' . $db->quoteName('c.asset_id'))
+			->from($db->quoteName('#__engage_comments', 'c'))
+			->join(
+				'LEFT', $db->quoteName('#__content', 'a'),
+				$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
+			)
+			->order($db->quoteName('c.created') . ' DESC')
+			->setLimit($numArticles, 0);
+
+		// Include Categories Filter
+		$fltCatInclude = $this->getState('filter.categories_include', []);
+
+		if (is_array($fltCatInclude) && !empty($fltCatInclude))
+		{
+			$query->whereIn($db->quoteName('a.catid'), $fltCatInclude);
+		}
+
+		// Exclude Categories Filter
+		$fltCatExclude = $this->getState('filter.categories_exclude', []);
+
+		if (is_array($fltCatExclude) && !empty($fltCatExclude))
+		{
+			$query->whereNotIn($db->quoteName('a.catid'), $fltCatExclude);
+		}
+
+		try
+		{
+			$assetIds = $db->setQuery($query)->loadColumn();
+		}
+		catch (Exception $e)
+		{
+			return [];
+		}
+
+		if (empty($assetIds))
+		{
+			return [];
+		}
+
+		$stashAssetId = $this->getState('filter.asset_id');
+		$stashStart   = $this->getState('list.start');
+		$stashLimit   = $this->getState('list.limit');
+
+		$ret = [];
+
+		foreach ($assetIds as $assetId)
+		{
+			$this->setState('filter.asset_id', $assetId);
+			$this->setState('list.start', 0);
+			$this->setState('list.limit', 1);
+
+			$ret = array_merge($ret, $this->getItems() ?: []);
+		}
+
+		$this->setState('filter.asset_id', $stashAssetId);
+		$this->setState('list.start', $stashStart);
+		$this->setState('list.limit', $stashLimit);
+
+		return $ret;
+	}
+
 	/**
 	 * Utility function that converts an array of id => parent_id into a tree representation of IDs.
 	 *
@@ -263,8 +367,8 @@ class CommentsModel extends ListModel
 	 * @param   int|null  $parentId  The parent ID to retrieve
 	 *
 	 * @return  array
-	 * @see     self::commentIDTreeSliceWithDepth
 	 * @since   1.0.0
+	 * @see     self::commentIDTreeSliceWithDepth
 	 */
 	protected function makeIDTree(array &$allIDs, ?int $parentId): array
 	{
@@ -314,69 +418,6 @@ class CommentsModel extends ListModel
 	}
 
 	/**
-	 * Automatically deletes up to 100 spam comments which are older than this many days.
-	 *
-	 * @param   int  $maxDays
-	 *
-	 * @return  int  Number of spam comments deleted
-	 * @since   1.0.0
-	 */
-	private function cleanSpamChunk(int $maxDays = 15): int
-	{
-		$maxDays = max(0, $maxDays);
-
-		if ($maxDays === 0)
-		{
-			return 0;
-		}
-
-		try
-		{
-			$interval     = new DateInterval(sprintf('P%uD', $maxDays));
-			$earliestDate = (clone Factory::getDate())->sub($interval);
-		}
-		catch (Exception $e)
-		{
-			return 0;
-		}
-
-		/** @var self $model */
-		$model = $this->getMVCFactory()->createModel('Comments', 'Administrator', [
-			'ignore_request' => true,
-		]);
-		$model->setState('filter.enabled', -3);
-		$model->setState('filter.to', $earliestDate->toISO8601());
-		$obsoleteSpam = $model->getItems();
-
-		if (empty($obsoleteSpam))
-		{
-			return 0;
-		}
-
-		$spamIds = array_map(function ($x) {
-			return $x->id;
-		}, $obsoleteSpam);
-		$spamIds = array_unique($spamIds);
-
-		if (empty($spamIds))
-		{
-			return 0;
-		}
-
-		/** @var CommentModel $commentModel */
-		$commentModel = $this->getMVCFactory()->createModel('Comment', 'Administrator', [
-			'ignore_request' => true,
-		]);
-
-		if (!$commentModel->delete($spamIds))
-		{
-			throw new \RuntimeException($commentModel->getError());
-		}
-
-		return count($spamIds);
-	}
-
-	/**
 	 * Get a DatabaseQuery object for retrieving the data from the database table.
 	 *
 	 * @return  DatabaseQuery  A DatabaseQuery object to retrieve the data.
@@ -387,26 +428,48 @@ class CommentsModel extends ListModel
 	{
 		$db    = $this->getDatabase();
 		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true))
-			->select([
-				$db->quoteName('c') . '.*',
-				'IFNULL(' . $db->quoteName('u.name') . ', ' . $db->quoteName('c.name') . ') AS ' . $db->quoteName('user_name'),
-				'IFNULL(' . $db->quoteName('u.email') . ', ' . $db->quoteName('c.email') . ') AS ' . $db->quoteName('user_email'),
-				$db->quoteName('a.title', 'article_title'),
-				$db->quoteName('a.alias', 'article_alias'),
-				$db->quoteName('a.catid', 'article_catid'),
-				$db->quoteName('cat.title', 'cat_title'),
-				$db->quoteName('cat.alias', 'cat_alias'),
-			])
-			->from($db->quoteName('#__engage_comments', 'c'))
-			->join('LEFT', $db->quoteName('#__users', 'u'),
-				$db->quoteName('u.id') . ' = ' . $db->quoteName('c.created_by')
+			->select(
+				[
+					$db->quoteName('c') . '.*',
+					'IFNULL(' . $db->quoteName('u.name') . ', ' . $db->quoteName('c.name') . ') AS ' . $db->quoteName(
+						'user_name'
+					),
+					'IFNULL(' . $db->quoteName('u.email') . ', ' . $db->quoteName('c.email') . ') AS ' . $db->quoteName(
+						'user_email'
+					),
+					$db->quoteName('a.title', 'article_title'),
+					$db->quoteName('a.alias', 'article_alias'),
+					$db->quoteName('a.catid', 'article_catid'),
+					$db->quoteName('cat.title', 'cat_title'),
+					$db->quoteName('cat.alias', 'cat_alias'),
+				]
 			)
-			->join('LEFT', $db->quoteName('#__content', 'a'),
-				$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
-			)
-			->join('LEFT', $db->quoteName('#__categories', 'cat'),
-				$db->quoteName('cat.id') . ' = ' . $db->quoteName('a.catid')
-			);
+			->from($db->quoteName('#__engage_comments', 'c'));
+
+		if (!self::CONJOINED)
+		{
+			$query
+				->join(
+					'LEFT', $db->quoteName('#__users', 'u'),
+					$db->quoteName('u.id') . ' = ' . $db->quoteName('c.created_by')
+				)
+				->join(
+					'LEFT', $db->quoteName('#__content', 'a'),
+					$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
+				)
+				->join(
+					'LEFT', $db->quoteName('#__categories', 'cat'),
+					$db->quoteName('cat.id') . ' = ' . $db->quoteName('a.catid')
+				);
+		}
+		else
+		{
+			$conjoinedWhere = [
+				$db->quoteName('u.id') . ' = ' . $db->quoteName('c.created_by'),
+				$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id'),
+				$db->quoteName('cat.id') . ' = ' . $db->quoteName('a.catid'),
+			];
+		}
 
 		// Frontend listing filter
 		$fltFrontend = $this->getState('filter.frontend');
@@ -416,10 +479,12 @@ class CommentsModel extends ListModel
 			$user       = Factory::getApplication()->getIdentity() ?? (new User());
 			$userAccess = $user->getAuthorisedViewLevels() ?: [];
 			$query
-				->select([
-					$db->quoteName('a.id', 'article_id'),
-					$db->quoteName('cat.id', 'cat_id'),
-				])
+				->select(
+					[
+						$db->quoteName('a.id', 'article_id'),
+						$db->quoteName('cat.id', 'cat_id'),
+					]
+				)
 				->where($db->quoteName('cat.published') . ' = 1')
 				->where($db->quoteName('a.state') . ' = 1')
 				->whereIn($db->quoteName('a.access'), $userAccess, ParameterType::INTEGER)
@@ -468,51 +533,114 @@ class CommentsModel extends ListModel
 		{
 			if (substr($fltSearch, 0, 3) === 'id:')
 			{
-				$fsValue = substr($fltSearch, 3);
+				$fsValue = @intval(trim(substr($fltSearch, 3)));
 
-				$query->where($db->quoteName('c.id') . ' = :filter_search')
-					->bind(':filter_search', $fsValue, ParameterType::INTEGER);
+				if (is_int($fsValue) && ($fsValue > 0))
+				{
+					$query->where($db->quoteName('c.id') . ' = :filter_search')
+						->bind(':filter_search', $fsValue, ParameterType::INTEGER);
+				}
 			}
-			if (substr($fltSearch, 0, 3) === 'ip:')
+			elseif (substr($fltSearch, 0, 3) === 'ip:')
 			{
-				$fsValue = '%' . substr($fltSearch, 3) . '%';
+				$fsValue = trim(substr($fltSearch, 3));
 
-				$query->where($db->quoteName('c.ip') . ' LIKE :filter_search')
-					->bind(':filter_search', $fsValue, ParameterType::STRING);
+				if ($fsValue)
+				{
+					$fsValue = '%' . substr($fltSearch, 3) . '%';
+
+					$query->where($db->quoteName('c.ip') . ' LIKE :filter_search')
+						->bind(':filter_search', $fsValue, ParameterType::STRING);
+				}
 			}
 			elseif (substr($fltSearch, 0, 5) === 'user:')
 			{
-				$fltCreatedBy = null;
-				$fsValue      = '%' . substr($fltSearch, 5) . '%';
+				$fsValue = trim(substr($fltSearch, 5));
 
-				if ($query->where === null)
+				if ($fsValue)
 				{
-					// So that extendWhere() doesn't output bad SQL
-					$query->where('1=1');
-				}
+					$fltCreatedBy = null;
+					$fsValue      = '%' . $fsValue . '%';
 
-				$query->extendWhere('AND', [
-					$db->quoteName('u.name') . ' LIKE :filter_search_1',
-					$db->quoteName('c.name') . ' LIKE :filter_search_2',
-					$db->quoteName('u.email') . ' LIKE :filter_search_3',
-					$db->quoteName('c.email') . ' LIKE :filter_search_3',
-				], 'OR')
-					->bind(':filter_search_1', $fsValue, ParameterType::STRING)
-					->bind(':filter_search_2', $fsValue, ParameterType::STRING)
-					->bind(':filter_search_3', $fsValue, ParameterType::STRING)
-					->bind(':filter_search_4', $fsValue, ParameterType::STRING);
+					/**
+					 * Performance tweak.
+					 *
+					 * If we do not put these filters in the ON clause of the JOIN we get a very slow query. However,
+					 * putting these filters _only_ in the ON clause isn't enough, because MySQL won't actually apply
+					 * the filters. So, we have to put them in both places.
+					 *
+					 * Using EXPLAIN ANALYZE tells us why this matters.
+					 *
+					 * In both cases, the innermost nested loop inner join loops for the number of comment rows.
+					 *
+					 * Without the filter, each iteration loops for the total number of user rows.
+					 *
+					 * With the filter, the filter is evaluated first, so each iteration only loops for the number of
+					 * matched rows.
+					 *
+					 * Since the number of matched rows is significantly smaller than the total number of table rows,
+					 * the innermost loop completes faster.
+					 *
+					 * Note that in both cases the innermost loop calculates the exact same matrix product of two
+					 * tables (same number of rows). This will still have to be filtered by the WHERE clause. The trick
+					 * is that by placing the filter in the ON clause we arrive at the product much faster, thus saving
+					 * a lot of time.
+					 *
+					 * TODO Can I make the matrix multiplication less asinine?!
+					 */
+					if (self::CONJOINED)
+					{
+						$conjoinedWhere[] = '(' . implode(
+								' OR ',
+								[
+									$db->quoteName('u.name') . ' LIKE :fsv1',
+									$db->quoteName('u.email') . ' LIKE :fsv2',
+									$db->quoteName('c.name') . ' LIKE :fsv3',
+									$db->quoteName('c.email') . ' LIKE :fsv4',
+								]
+							) . ')';
+						$query
+							->bind(':fsv1', $fsValue, ParameterType::STRING)
+							->bind(':fsv2', $fsValue, ParameterType::STRING)
+							->bind(':fsv3', $fsValue, ParameterType::STRING)
+							->bind(':fsv4', $fsValue, ParameterType::STRING);
+					}
+
+					if ($query->where === null)
+					{
+						// So that extendWhere() doesn't output bad SQL
+						$query->where('1=1');
+					}
+
+					$query->extendWhere(
+						'AND',
+						[
+							$db->quoteName('u.name') . ' LIKE :filter_search_1',
+							$db->quoteName('u.email') . ' LIKE :filter_search_3',
+							$db->quoteName('c.name') . ' LIKE :filter_search_2',
+							$db->quoteName('c.email') . ' LIKE :filter_search_4',
+						],
+						'OR'
+					)
+						->bind(':filter_search_1', $fsValue, ParameterType::STRING)
+						->bind(':filter_search_3', $fsValue, ParameterType::STRING)
+						->bind(':filter_search_2', $fsValue, ParameterType::STRING)
+						->bind(':filter_search_4', $fsValue, ParameterType::STRING);
+				}
 			}
 			elseif (substr($fltSearch, 0, 9) === 'username:')
 			{
 				$fsValue = '%' . substr($fltSearch, 9) . '%';
+
 				$query->where($db->quoteName('u.username') . ' LIKE :filter_search')
 					->bind(':filter_search', $fsValue, ParameterType::STRING);
 			}
 			elseif (substr($fltSearch, 0, 6) === 'title:')
 			{
 				$fsValue = '%' . substr($fltSearch, 6) . '%';
-				$query->where($db->quoteName('a.asset_id') . ' = :filter_search')
-					->bind(':filter_search', $fsValue, ParameterType::INTEGER);
+
+				$query->where($db->quoteName('a.title') . ' = :filter_search')
+					->bind(':filter_search', $fsValue, ParameterType::STRING);
 			}
 			elseif (substr($fltSearch, 0, 8) === 'comment:')
 			{
@@ -531,13 +659,15 @@ class CommentsModel extends ListModel
 					$query->where('1=1');
 				}
 
-				$query->extendWhere('AND', [
+				$query->extendWhere(
+					'AND', [
 					$db->quoteName('c.body') . 'LIKE :filter_search',
 					$db->quoteName('u.name') . ' LIKE :filter_search_1',
 					$db->quoteName('c.name') . ' LIKE :filter_search_2',
 					$db->quoteName('u.email') . ' LIKE :filter_search_3',
 					$db->quoteName('c.email') . ' LIKE :filter_search_4',
-				], 'OR')
+				], 'OR'
+				)
 					->bind(':filter_search', $fsValue, ParameterType::STRING)
 					->bind(':filter_search_1', $fsValue, ParameterType::STRING)
 					->bind(':filter_search_2', $fsValue, ParameterType::STRING)
@@ -615,6 +745,31 @@ class CommentsModel extends ListModel
 				->bind(':to', $sTo, ParameterType::STRING);
 		}
 
+		if (self::CONJOINED)
+		{
+			$conjoinedTables = [
+				$db->quoteName('#__users', 'u') . ' USE INDEX (' . implode(
+					',', array_map([$db, 'quoteName'], ['PRIMARY', 'idx_username', 'idx_name'])
+				)
+				. ')',
+				$db->quoteName('#__content', 'a') . ' USE INDEX (' . implode(
+					',', array_map([$db, 'quoteName'], ['PRIMARY', 'idx_catid'])
+				)
+				. ')',
+				$db->quoteName('#__categories', 'cat') . ' USE INDEX (' . implode(
+					',', array_map([$db, 'quoteName'], ['PRIMARY'])
+				)
+				. ')',
+			];
+
+			$query
+				->join(
+					'LEFT',
+					'(' . implode(',', $conjoinedTables) . ')',
+					implode(' AND ', $conjoinedWhere)
+				);
+		}
+
 		// List ordering clause
 		$orderCol  = $this->state->get('list.ordering', 'c.created');
 		$orderDirn = $this->state->get('list.direction', 'DESC');
@@ -636,6 +791,51 @@ class CommentsModel extends ListModel
 		return $query;
 	}
 
+	/**
+	 * Returns a record count for the query.
+	 *
+	 * Note: Current implementation of this method assumes that getListQuery() returns a set of unique rows,
+	 * thus it uses SELECT COUNT(*) to count the rows. In cases that getListQuery() uses DISTINCT
+	 * then either this method must be overridden by a custom implementation at the derived Model Class
+	 * or a GROUP BY clause should be used to make the set unique.
+	 *
+	 * @param   DatabaseQuery|string  $query  The query.
+	 *
+	 * @return  integer  Number of rows for query.
+	 *
+	 * @since   3.0
+	 */
+	protected function _getListCount($query)
+	{
+		// Eliminate the JOINs if we're counting without applying filters to tables other than `#__engage_comments`.
+		if (self::CONJOINED)
+		{
+			$hasOtherTables =
+				$query->where !== null
+				&& array_reduce(
+					$query->where->getElements(),
+					function (bool $carry, ?string $item) {
+						if ($carry || empty($item))
+						{
+							return $carry;
+						}
+
+						[$t,] = explode('.', $item, 2);
+
+						return $t !== '`c`';
+					},
+					false
+				);
+
+			if (!$hasOtherTables)
+			{
+				$query->clear('join');
+			}
+		}
+
+		return parent::_getListCount($query);
+	}
+
 	protected function getStoreId($id = '')
 	{
 		$id .= ':' . $this->getState('filter.search');
@@ -652,81 +852,72 @@ class CommentsModel extends ListModel
 		return parent::getStoreId($id);
 	}
 
-	public function clearCache($id = '')
-	{
-		unset($this->cache[$this->getStoreId($id)]);
-	}
-
 	/**
-	 * Get the latest commented articles, with their corresponding latest comment's information.
+	 * Automatically deletes up to 100 spam comments which are older than this many days.
 	 *
-	 * @param   int  $numArticles  Up to how many articles to return
+	 * @param   int  $maxDays
 	 *
-	 * @return  array
-	 * @since   3.4.0
+	 * @return  int  Number of spam comments deleted
+	 * @since   1.0.0
 	 */
-	public function getLatestArticles(int $numArticles = 10): array
+	private function cleanSpamChunk(int $maxDays = 15): int
 	{
-		$db = $this->getDatabase();
-		/** @var DatabaseQuery $query */
-		$query = (method_exists($db, 'createQuery') ? $db->createQuery() : $db->getQuery(true));
-		$query->select('DISTINCT ' . $db->quoteName('c.asset_id'))
-			->from($db->quoteName('#__engage_comments', 'c'))
-			->join('LEFT', $db->quoteName('#__content', 'a'),
-				$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
-			)
-			->order($db->quoteName('c.created') . ' DESC')
-			->setLimit($numArticles, 0);
+		$maxDays = max(0, $maxDays);
 
-		// Include Categories Filter
-		$fltCatInclude = $this->getState('filter.categories_include', []);
-
-		if (is_array($fltCatInclude) && !empty($fltCatInclude))
+		if ($maxDays === 0)
 		{
-			$query->whereIn($db->quoteName('a.catid'), $fltCatInclude);
-		}
-
-		// Exclude Categories Filter
-		$fltCatExclude = $this->getState('filter.categories_exclude', []);
-
-		if (is_array($fltCatExclude) && !empty($fltCatExclude))
-		{
-			$query->whereNotIn($db->quoteName('a.catid'), $fltCatExclude);
+			return 0;
 		}
 
 		try
 		{
-			$assetIds = $db->setQuery($query)->loadColumn();
+			$interval     = new DateInterval(sprintf('P%uD', $maxDays));
+			$earliestDate = (clone Factory::getDate())->sub($interval);
 		}
 		catch (Exception $e)
 		{
-			return [];
+			return 0;
 		}
 
-		if (empty($assetIds))
+		/** @var self $model */
+		$model = $this->getMVCFactory()->createModel(
+			'Comments', 'Administrator', [
+				'ignore_request' => true,
+			]
+		);
+		$model->setState('filter.enabled', -3);
+		$model->setState('filter.to', $earliestDate->toISO8601());
+		$obsoleteSpam = $model->getItems();
+
+		if (empty($obsoleteSpam))
 		{
-			return [];
+			return 0;
 		}
 
-		$stashAssetId = $this->getState('filter.asset_id');
-		$stashStart   = $this->getState('list.start');
-		$stashLimit   = $this->getState('list.limit');
+		$spamIds = array_map(
+			function ($x) {
+				return $x->id;
+			}, $obsoleteSpam
+		);
+		$spamIds = array_unique($spamIds);
 
-		$ret = [];
-
-		foreach ($assetIds as $assetId)
+		if (empty($spamIds))
 		{
-			$this->setState('filter.asset_id', $assetId);
-			$this->setState('list.start', 0);
-            $this->setState('list.limit', 1);
-
-			$ret = array_merge($ret, $this->getItems() ?: []);
+			return 0;
 		}
 
-		$this->setState('filter.asset_id', $stashAssetId);
-		$this->setState('list.start', $stashStart);
-		$this->setState('list.limit', $stashLimit);
+		/** @var CommentModel $commentModel */
+		$commentModel = $this->getMVCFactory()->createModel(
+			'Comment', 'Administrator', [
+				'ignore_request' => true,
+			]
+		);
 
-		return $ret;
+		if (!$commentModel->delete($spamIds))
+		{
+			throw new \RuntimeException($commentModel->getError());
+		}
+
+		return count($spamIds);
 	}
 }
