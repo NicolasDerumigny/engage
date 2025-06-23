@@ -16,6 +16,7 @@ use Akeeba\Component\Engage\Administrator\Mixin\ControllerReturnURLTrait;
 use Akeeba\Component\Engage\Administrator\Mixin\ControllerReusableModelsTrait;
 use Akeeba\Component\Engage\Administrator\Table\CommentTable;
 use Akeeba\Component\Engage\Site\Mixin\ControllerFrontendCommentsTrait;
+use Akeeba\Component\Engage\Site\Model\CommentModel;
 use Exception;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
@@ -83,12 +84,26 @@ class CommentController extends AdminCommentController
 	{
 		$this->applyReturnUrl();
 
+		global $akengage_newcomment_id;
+
+		if (isset($akengage_newcomment_id) && !empty($akengage_newcomment_id))
+		{
+			$this->addCommentFragmentToReturnURL($akengage_newcomment_id);
+		}
+
 		$this->cleanCache();
 	}
 
 	protected function onAfterSave()
 	{
 		$this->applyReturnUrl();
+
+		global $akengage_newcomment_id;
+
+		if (isset($akengage_newcomment_id) && !empty($akengage_newcomment_id))
+		{
+			$this->addCommentFragmentToReturnURL($akengage_newcomment_id);
+		}
 
 		$this->cleanCache();
 	}

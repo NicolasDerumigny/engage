@@ -86,7 +86,7 @@ trait ControllerFrontendCommentsTrait
 	 * @return  void
 	 * @since   1.0.0
 	 */
-	private function addCommentFragmentToReturnURL(): void
+	private function addCommentFragmentToReturnURL(?int $cid = null): void
 	{
 		$redirectUrl = $this->getRedirection() ?: $this->getReturnUrl();
 
@@ -102,7 +102,7 @@ trait ControllerFrontendCommentsTrait
 			return;
 		}
 
-		$cid = $this->input->get('cid', []);
+		$cid ??= $this->input->get('cid', []);
 
 		if (!is_array($cid))
 		{

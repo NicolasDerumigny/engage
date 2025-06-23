@@ -102,6 +102,30 @@ class CommentTable extends AbstractTable
 		return $result;
 	}
 
+	protected function onAfterCreate($junk)
+	{
+		/**
+		 * This is fugly, but Joomla doesn' help me here. It's supposed to set the ID of the new item in the model
+		 * state, and I am supposed to be able to get it in the `postSaveHook`.
+		 *
+		 * SUPPOSED TO.
+		 *
+		 * Even though I see Joomla calling setState with the correct value... the value is never set in the model's
+		 * state. Therefore, I cannot access it from my controller.
+		 *
+		 * There are many ways to work around that, none of which is architecturally correct except overriding the
+		 * model's save() method, copying and pasting Joomla's code, and introducing a new public variable I can access
+		 * from postSaveHook. However, that puts a huge maintenance burden so eff that noise.
+		 *
+		 * THis leaves us with terrible, architecturally incorrect solutions. Among all bad solutions, using a global
+		 * variable is the lightest, and easiest to refactor solution out there.
+		 *
+		 */
+		global $akengage_newcomment_id;
+
+		$akengage_newcomment_id = $this->id;
+	}
+
 	/**
 	 * Runs after deleting a comment. Used to automatically delete all child comments as well.
 	 *

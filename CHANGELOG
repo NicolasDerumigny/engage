@@ -2,6 +2,7 @@
 Akeeba Engage 3.4.3
 ================================================================================
 + Backend query speed optimisation
++ Redirect to the comment after submitting a new one in the frontend (gh-343)
 ~ Experimental support for Joomla 6.0-alpha1
 
 Akeeba Engage 3.4.2
