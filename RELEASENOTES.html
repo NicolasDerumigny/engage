@@ -1,9 +1,17 @@
 <h3>What's new?</h3>
 
 <p>
-	<strong>Improvements in the latest comments module</strong>. Filter by article categories, show latest commented articles instead, and set max words or characters to 0 to not display the comment at all.
+	<strong>Preliminary support for Joomla 6</strong>. This version comes with <strong>preliminary</strong> compatibility with Joomla! 6. At the time of this writing, Joomla 6.0 Alpha 2 has just been released, and that's our compatibility target. We expect more changes to take place before Joomla! 6 stable is released, with as yet unknown impact to compatibility. We will keep following Joomla 6 development and adapting our software as necessary.
 </p>
 
 <p>
-	<strong>Bug fixes and minor improvements</strong>. Please take a look at the CHANGELOG below.
+	<strong>Backend query speed optimisation</strong>. The query to display the list of comments in the backend of the site has been optimised for improved speed.
+</p>
+
+<p>
+	<strong>Redirect to the comment after submitting a new one in the frontend</strong> (gh-343). IN the past, submitting a comment in the frontend would take you back to the first page of comments, even if your comment was set up to be immediately approved for display. Now it will try to take you directly to the comment you left. Please note that depending on your Joomla cache settings, the System - Page Cache plugin being enabled, the existence of a CDN in front of your site, and the comment approval workflow you are using it may be possible that this new feature DOES NOT work on your site.
+</p>
+
+<p>
+	Bug fixes and minor improvements
 </p>
