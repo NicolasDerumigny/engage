@@ -1,4 +1,8 @@
 <?php die(); ?>
+Akeeba Engage 3.5.0
+================================================================================
++ PostgreSQL support (experimental)
+
 Akeeba Engage 3.4.3
 ================================================================================
 + Backend query speed optimisation

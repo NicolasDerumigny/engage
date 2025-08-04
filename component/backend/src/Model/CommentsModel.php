@@ -30,8 +30,6 @@ class CommentsModel extends ListModel
 {
 	use ModelPopulateStateTrait;
 
-	private const CONJOINED = 1;
-
 	/**
 	 * The number of tree-aware comments fetched by commentIDTreeSliceWithDepth
 	 *
@@ -431,10 +429,10 @@ class CommentsModel extends ListModel
 			->select(
 				[
 					$db->quoteName('c') . '.*',
-					'IFNULL(' . $db->quoteName('u.name') . ', ' . $db->quoteName('c.name') . ') AS ' . $db->quoteName(
+					'COALESCE(' . $db->quoteName('u.name') . ', ' . $db->quoteName('c.name') . ') AS ' . $db->quoteName(
 						'user_name'
 					),
-					'IFNULL(' . $db->quoteName('u.email') . ', ' . $db->quoteName('c.email') . ') AS ' . $db->quoteName(
+					'COALESCE(' . $db->quoteName('u.email') . ', ' . $db->quoteName('c.email') . ') AS ' . $db->quoteName(
 						'user_email'
 					),
 					$db->quoteName('a.title', 'article_title'),
@@ -446,7 +444,7 @@ class CommentsModel extends ListModel
 			)
 			->from($db->quoteName('#__engage_comments', 'c'));
 
-		if (!self::CONJOINED)
+		if (!$this->canBeConjoined())
 		{
 			$query
 				->join(
@@ -588,7 +586,7 @@ class CommentsModel extends ListModel
 					 *
 					 * TODO Can I make the matrix multiplication less asinine?!
 					 */
-					if (self::CONJOINED)
+					if ($this->canBeConjoined())
 					{
 						$conjoinedWhere[] = '(' . implode(
 								' OR ',
@@ -745,7 +743,7 @@ class CommentsModel extends ListModel
 				->bind(':to', $sTo, ParameterType::STRING);
 		}
 
-		if (self::CONJOINED)
+		if ($this->canBeConjoined())
 		{
 			$conjoinedTables = [
 				$db->quoteName('#__users', 'u') . ' USE INDEX (' . implode(
@@ -808,7 +806,7 @@ class CommentsModel extends ListModel
 	protected function _getListCount($query)
 	{
 		// Eliminate the JOINs if we're counting without applying filters to tables other than `#__engage_comments`.
-		if (self::CONJOINED)
+		if ($this->canBeConjoined())
 		{
 			$hasOtherTables =
 				$query->where !== null
@@ -919,5 +917,10 @@ class CommentsModel extends ListModel
 		}
 
 		return count($spamIds);
+	}
+
+	private function canBeConjoined(): bool
+	{
+		return $this->getDatabase()->getServerType() === 'mysql';
 	}
 }
