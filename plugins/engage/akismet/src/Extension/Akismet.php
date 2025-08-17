@@ -15,13 +15,13 @@ use Akeeba\Component\Engage\Site\Exceptions\BlatantSpam;
 use Akeeba\Component\Engage\Site\Helper\Meta;
 use Exception;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\Language\LanguageHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\User\User;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
+use Joomla\Http\HttpFactory;
 use Joomla\Http\Response;
 use RuntimeException;
 
@@ -285,7 +285,7 @@ class Akismet extends CMSPlugin implements SubscriberInterface
 		});
 
 		$apiUrl   = "https://{$apiKey}.rest.akismet.com/1.1/";
-		$http     = HttpFactory::getHttp([
+		$http     = (new HttpFactory())->getHttp([
 			'userAgent' => sprintf('Joomla/%s | AkeebaEngage/%s', JVERSION, defined('AKENGAGE_VERSION') ? AKENGAGE_VERSION : 'dev'),
 		]);
 		$uri      = new Uri($apiUrl . $action);
