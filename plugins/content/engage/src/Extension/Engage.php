@@ -341,10 +341,27 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-		$event->setArgument('result', array_merge($result, [
-			$this->renderCommentCount($params, $row, $context, false) .
-			$this->renderComments($params, $row, $context),
-		]));
+		$cache = Factory::getCache('com_engage.after_display', 'output');
+		$isArticle = ($context === 'com_content.article') && !(($params instanceof Registry) && $params->exists('moduleclass_sfx')); // `com_content.article` also identifies newsflash
+		// Do not cache everything for articles, as the comment form requires dynamic loading
+		if ($isArticle) {
+			$data = [
+				$this->renderCommentCount($params, $row, $context, false) .
+				$this->renderComments($params, $row, $context)
+			];
+		} else {
+			$key = $context . $row->id;
+			$data = $cache->get($key);
+			if ($data === false)
+			{
+				$data = [
+					$this->renderCommentCount($params, $row, $context, false) .
+					$this->renderComments($params, $row, $context)
+				];
+				$cache->store($data, $key);
+			}
+		}
+		$event->setArgument('result', array_merge($result, $data));
 	}
 
 	/**
@@ -372,9 +389,25 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-		$event->setArgument('result', array_merge($result, [
-			$this->renderCommentCount($params, $row, $context, true),
-		]));
+		$cache = Factory::getCache('com_engage.before_display', 'output');
+		$isArticle = ($context === 'com_content.article') && !(($params instanceof Registry) && $params->exists('moduleclass_sfx')); // `com_content.article` also identifies newsflash
+		// Do not cache everything for articles, as the comment form requires dynamic loading
+		if ($isArticle) {
+			$data = [
+				$this->renderCommentCount($params, $row, $context, true)
+			];
+		} else {
+			$key = $context . $row->id;
+			$data = $cache->get($key);
+			if ($data === false)
+			{
+				$data = [
+					$this->renderCommentCount($params, $row, $context, true)
+				];
+				$cache->store($data, $key);
+			}
+		}
+		$event->setArgument('result', array_merge($result, $data));
 	}
 
 	/**
@@ -399,6 +432,42 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		$event->setArgument('result', array_merge($result, [
 			true,
 		]));
+
+		$cacheBeforeDisplay = Factory::getCache('com_engage.before_display', 'output');
+		$cacheAfterDisplay = Factory::getCache('com_engage.after_display', 'output');
+		if ($context === 'com_categories.category')
+		{
+			// Parent settings may have changed: invalidate completely the cache
+			$cacheBeforeDisplay->clean();
+			$cacheAfterDisplay->clean();
+		}
+		else if ($context === 'com_content.article' && $isNew === false)
+		{
+			// Invalidate only the updated id
+			$cacheBeforeDisplay->remove('com_content.article' . $table->id);
+			$cacheAfterDisplay->remove('com_content.article' . $table->id);
+			$cacheBeforeDisplay->remove('com_categories.category' . $table->id);
+			$cacheAfterDisplay->remove('com_categories.category' . $table->id);
+			$cacheBeforeDisplay->remove('com_content.featured' . $table->id);
+			$cacheAfterDisplay->remove('com_content.featured' . $table->id);
+		}
+		else if ($context === 'com_engage.comment')
+		{
+			// Invalidate only the id of the target article
+			$db = $this->getDatabase();
+			$query = $db->getQuery(true)
+				->select($db->quoteName('id'))
+				->from($db->quoteName('#__content'))
+				->where($db->quoteName('asset_id') . ' = ' . $table->asset_id);
+				$db->setQuery($query);
+			$id = $db->loadResult();
+			$cacheBeforeDisplay->remove('com_content.article' . $id);
+			$cacheAfterDisplay->remove('com_content.article' . $id);
+			$cacheBeforeDisplay->remove('com_categories.category' . $id);
+			$cacheAfterDisplay->remove('com_categories.category' . $id);
+			$cacheBeforeDisplay->remove('com_content.featured' . $id);
+			$cacheAfterDisplay->remove('com_content.featured' . $id);
+		}
 
 		// In the frontend it uses com_content.form because screw you, that's why.
 		if (!in_array($context, ['com_categories.category', 'com_content.article', 'com_content.form']))
