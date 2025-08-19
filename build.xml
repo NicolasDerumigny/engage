@@ -75,9 +75,8 @@
 
     <target name="compile-css" description="Compile SCSS to minified CSS">
         <exec executable="sass" dir="${dirs.component}/media/css" checkreturn="true" passthru="true">
+            <arg value="--update" />
             <arg value="${dirs.component}/media/css:${dirs.component}/media/css" />
-            <arg value="-s" />
-            <arg value="compressed" />
         </exec>
     </target>
 

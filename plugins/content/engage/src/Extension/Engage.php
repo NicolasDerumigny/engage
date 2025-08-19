@@ -147,7 +147,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @param   Event  $event  The event we are handling
 	 *
 	 * @return  void
-	 * @since        1.0.0
+	 * @since   1.0.0
 	 *
 	 * @noinspection PhpUnused
 	 */
@@ -316,6 +316,67 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		}
 	}
 
+	/** Return the cache form comment count
+	 *
+	 * @return object
+	 * @since fork
+	 */
+	private function getCommentCountCache() {
+		return Factory::getCache('com_engage.comment_count', 'output');
+	}
+
+	/**
+	 * Cache the results of renderCommentCount based on context, permission (comment manager yes/no)
+	 * and article id
+	 *
+	 * @param   Registry|mixed  $params
+	 * @param   object|mixed    $row
+	 * @param   string|null     $context
+	 * @param   bool            $before  Am I asked to render this before the content?
+	 *
+	 * @return  string
+	 * @since   fork
+	 */
+	private function renderCommentCountCached($params, $row, ?string $context, bool $before = true): string
+	{
+		$cache = $this->getCommentCountCache();
+		$isManager = UserFetcher::getUser()->authorise('core.edit.state', 'com_engage') ? "manager_" : "normal_";
+		$isBefore = $before ? "before_" : "after_";
+		$key = $isBefore . $isManager . $context . $row->id;
+		$data = $cache->get($key);
+		if ($data === false)
+		{
+			$data = $this->renderCommentCount($params, $row, $context, $before);
+			$cache->store($data, $key);
+		}
+		return $data;
+}
+
+	/** Invalidate cache entries corresponding to an article id
+	 *
+	 * @param   int $id
+	 *
+	 * @return  void
+	 * @since   fork
+	 */
+	private function invalidateCommentCountCache($id)
+	{
+		$cache = $this->getCommentCountCache();
+		foreach (['com_content.article', 'com_categories.category', 'com_content.featured', 'com_tags.tag'] as $context)
+		{
+			foreach(["manager_", "normal_"] as $isManager)
+			{
+				foreach(["before_", "after_"] as $isBefore)
+				{
+					$key = $isBefore . $isManager . $context . $id;
+					$cache->remove($key);
+				}
+			}
+		}
+	}
+
+
+
 	/**
 	 * Returns the content to display after an article. Used to render the comments interface.
 	 *
@@ -341,27 +402,10 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-		$cache = Factory::getCache('com_engage.after_display', 'output');
-		$isArticle = ($context === 'com_content.article') && !(($params instanceof Registry) && $params->exists('moduleclass_sfx')); // `com_content.article` also identifies newsflash
-		// Do not cache everything for articles, as the comment form requires dynamic loading
-		if ($isArticle) {
-			$data = [
-				$this->renderCommentCount($params, $row, $context, false) .
-				$this->renderComments($params, $row, $context)
-			];
-		} else {
-			$key = $context . $row->id;
-			$data = $cache->get($key);
-			if ($data === false)
-			{
-				$data = [
-					$this->renderCommentCount($params, $row, $context, false) .
-					$this->renderComments($params, $row, $context)
-				];
-				$cache->store($data, $key);
-			}
-		}
-		$event->setArgument('result', array_merge($result, $data));
+		$event->setArgument('result', array_merge($result, [
+			$this->renderCommentCountCached($params, $row, $context, false) .
+			$this->renderComments($params, $row, $context)
+		]));
 	}
 
 	/**
@@ -389,25 +433,9 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-		$cache = Factory::getCache('com_engage.before_display', 'output');
-		$isArticle = ($context === 'com_content.article') && !(($params instanceof Registry) && $params->exists('moduleclass_sfx')); // `com_content.article` also identifies newsflash
-		// Do not cache everything for articles, as the comment form requires dynamic loading
-		if ($isArticle) {
-			$data = [
-				$this->renderCommentCount($params, $row, $context, true)
-			];
-		} else {
-			$key = $context . $row->id;
-			$data = $cache->get($key);
-			if ($data === false)
-			{
-				$data = [
-					$this->renderCommentCount($params, $row, $context, true)
-				];
-				$cache->store($data, $key);
-			}
-		}
-		$event->setArgument('result', array_merge($result, $data));
+		$event->setArgument('result', array_merge($result, [
+			$this->renderCommentCountCached($params, $row, $context, true)
+		]));
 	}
 
 	/**
@@ -433,23 +461,15 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			true,
 		]));
 
-		$cacheBeforeDisplay = Factory::getCache('com_engage.before_display', 'output');
-		$cacheAfterDisplay = Factory::getCache('com_engage.after_display', 'output');
 		if ($context === 'com_categories.category')
 		{
 			// Parent settings may have changed: invalidate completely the cache
-			$cacheBeforeDisplay->clean();
-			$cacheAfterDisplay->clean();
+			$commentCountCache->clean();
 		}
 		else if ($context === 'com_content.article' && $isNew === false)
 		{
 			// Invalidate only the updated id
-			$cacheBeforeDisplay->remove('com_content.article' . $table->id);
-			$cacheAfterDisplay->remove('com_content.article' . $table->id);
-			$cacheBeforeDisplay->remove('com_categories.category' . $table->id);
-			$cacheAfterDisplay->remove('com_categories.category' . $table->id);
-			$cacheBeforeDisplay->remove('com_content.featured' . $table->id);
-			$cacheAfterDisplay->remove('com_content.featured' . $table->id);
+			$this->invalidateCommentCountCache($table->id);
 		}
 		else if ($context === 'com_engage.comment')
 		{
@@ -461,12 +481,8 @@ class Engage extends CMSPlugin implements SubscriberInterface
 				->where($db->quoteName('asset_id') . ' = ' . $table->asset_id);
 				$db->setQuery($query);
 			$id = $db->loadResult();
-			$cacheBeforeDisplay->remove('com_content.article' . $id);
-			$cacheAfterDisplay->remove('com_content.article' . $id);
-			$cacheBeforeDisplay->remove('com_categories.category' . $id);
-			$cacheAfterDisplay->remove('com_categories.category' . $id);
-			$cacheBeforeDisplay->remove('com_content.featured' . $id);
-			$cacheAfterDisplay->remove('com_content.featured' . $id);
+			// Invalidate only the updated id
+			$this->invalidateCommentCountCache($id);
 		}
 
 		// In the frontend it uses com_content.form because screw you, that's why.
@@ -1079,14 +1095,13 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		 */
 		$isNewsFlash = ($context === 'com_content.article') && ($params instanceof Registry) && $params->exists('moduleclass_sfx');
 
-		// We need to have a supported context
-		if (!$isNewsFlash && !in_array($context, ['com_content.category', 'com_content.featured']))
+		if (!$isNewsFlash && !in_array($context, ['com_content.category', 'com_content.featured', 'com_tags.tag']))
 		{
 			return '';
 		}
 
 		// Make sure this is really an article
-		if (!property_exists($row, 'introtext'))
+		if (!property_exists($row, 'introtext') && $context !== 'com_tags.tag')
 		{
 			return '';
 		}
@@ -1117,7 +1132,15 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		 * populate the article meta cache so next time I query the article meta I don't have to go through Joomla's
 		 * article model which saves me a very expensive query.
 		 */
-		$this->cacheArticleRow($row, true);
+		if ($context == 'com_tags.tag')
+		{
+			$row->title = $row->core_title;
+			$row->attribs = null;
+		}
+		else
+		{
+			$this->cacheArticleRow($row, true);
+		}
 
 		// Am I supposed to display comments at all?
 		$commentParams = $this->getParametersForArticle($row);
@@ -1133,7 +1156,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		 *
 		 * Uses the keys comments_show_feature, comments_show_category, comments_show_article
 		 */
-		$area              = substr($context, 12);
+		$area              = str_starts_with($context, "com_tags.")?substr($context, 9):substr($context, 12);
 		$optionKey         = sprintf("comments_show_%s", $area);
 		$showCommentsCount = $commentParams->get($optionKey, 0);
 
