@@ -7,6 +7,7 @@
 
 use Akeeba\Component\Engage\Administrator\Model\CommentsModel;
 use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 
@@ -30,7 +31,10 @@ extract($displayData);
 
 // Get the number of comments for this article
 $model->setState('filter.asset_id', $row->asset_id);
-$model->setState('filter.enabled', 1);
+if (!Factory::getUser()->authorise('core.edit.state', 'com_engage'))
+{
+	$model->setState('filter.enabled', 1);
+}
 $numComments = $model->getTotal();
 
 // Language key to use

@@ -1,15 +1,10 @@
 This is an *unofficial* fork of Akeeba Engage, used to suite our own needs / usage. THIS REPOSITORY COMES WITH NO GUARANTEE!
 
-List of changes since fork:
-- Use caching for comments summary
-
 TODO:
-- Permission changes:
-    * Comment managers (i.e. edit any / unpublish / delete) are users with `core.edit` permissions.
-    * Comment reportes are users with `core.edit.state` permission, and may *only* report as spam.
-- Add summary for `com_tags.tag` pages
-- Summaries must not count unpublished / spam comments for non-managers
-- Allow guest users to comment without email
+- Allow guest users to comment without email and add an option for it in top level config
+- Test / Correct button disable on comment submission
+- Do not show any image for guest
+- Correct return url on edit / comment deletion
 
 ---------
 # Akeeba Engage

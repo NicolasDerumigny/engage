@@ -96,7 +96,7 @@ class HtmlView extends BaseHtmlView
 		'edit'   => false,
 		// Edit own comments
 		'own'    => false,
-		// Edit comments' state (pubished, unpublished, spam)
+		// Edit comments' state (published -> spam transition only)
 		'state'  => false,
 		// Delete comments
 		'delete' => false,

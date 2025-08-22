@@ -1,4 +1,12 @@
 <?php die(); ?>
+Akeeba Engage 3.6.0-fork
+================================================================================
++ Use caching for comments summary
++ Add summary for `com_tags.tag` pages
+~ Do not use conjoin on `CommentsModel`
+! Summaries must not count unpublished / spam comments for non-managers
+~ Permission changes. Comment managers (users with `core.edit.state` permission) may *only* report as spam/ham. Users with `core.edit` permission can unpublish / delete without restrictions.
+
 Akeeba Engage 3.5.0
 ================================================================================
 + PostgreSQL support (experimental)

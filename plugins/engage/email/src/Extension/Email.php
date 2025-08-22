@@ -148,7 +148,7 @@ class Email extends CMSPlugin implements SubscriberInterface
 	/**
 	 * Returns the ID of all Joomla user groups which are Comment Managers.
 	 *
-	 * Any user group that has the core.edit.state privilege on the component is considered a Comment Manager.
+	 * Any user group that has the core.edit privilege on the component is considered a Comment Manager.
 	 *
 	 * @return  array
 	 * @since   1.0.0
@@ -165,8 +165,8 @@ class Email extends CMSPlugin implements SubscriberInterface
 
 		return array_filter($adminGroups, function ($group) {
 			return
-				Access::checkGroup($group, 'core.edit.state', 'com_engage') ||
-				Access::checkGroup($group, 'core.edit.state') ||
+				Access::checkGroup($group, 'core.edit', 'com_engage') ||
+				Access::checkGroup($group, 'core.edit') ||
 				Access::checkGroup($group, 'core.admin');
 		});
 	}

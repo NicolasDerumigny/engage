@@ -83,6 +83,20 @@ class CommentModel extends AdminModel
 	}
 
 	/**
+	 * Method to test whether a record can be edited.
+	 *
+	 * @param  object  $record  A record object.
+	 *
+	 * @return boolean  True is allowed to edit te record.
+	 *
+	 * @since 3.6.0-fork
+	 */
+	protected function canEdit($record)
+	{
+		return $this->getCurrentUser()->authorise('core.edit', $this->option);
+	}
+
+	/**
 	 * Report a message as ham or spam. The actual reporting is taken care of by the plugins.
 	 *
 	 * @param   bool  $asSpam  True to report as spam, false to report as ham.
@@ -114,7 +128,7 @@ class CommentModel extends AdminModel
 				}
 
 				$event = $asSpam ? 'onAkeebaEngageReportSpam' : 'onAkeebaEngageReportHam';
-				$allowed = $asSpam ? $this->canDelete($table) : $this->canEditState($table);
+				$allowed = $asSpam ? $this->canDelete($table) : $this->canEdit($table);
 
 				if (!$allowed)
 				{

@@ -319,7 +319,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	/** Return the cache form comment count
 	 *
 	 * @return object
-	 * @since fork
+	 * @since 3.6.0
 	 */
 	private function getCommentCountCache() {
 		return Factory::getCache('com_engage.comment_count', 'output');
@@ -335,7 +335,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @param   bool            $before  Am I asked to render this before the content?
 	 *
 	 * @return  string
-	 * @since   fork
+	 * @since   3.6.0
 	 */
 	private function renderCommentCountCached($params, $row, ?string $context, bool $before = true): string
 	{
@@ -357,7 +357,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @param   int $id
 	 *
 	 * @return  void
-	 * @since   fork
+	 * @since   3.6.0
 	 */
 	private function invalidateCommentCountCache($id)
 	{

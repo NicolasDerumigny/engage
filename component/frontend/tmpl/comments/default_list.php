@@ -159,12 +159,12 @@ $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->ena
 					<div class="akengage-comment-actions d-flex gap-1">
 					<?php if ($this->perms['state']): ?>
 						<span class="akengage-comment-publish_unpublish">
-						<?php if ($comment->enabled == 1): ?>
+						<?php if ($comment->enabled == 1 && $this->perms['edit']): ?>
 							<button class="akengage-comment-unpublish-btn btn btn-sm btn-outline-secondary"
 									data-akengageid="<?= $comment->id ?>">
 								<?= Text::_('COM_ENGAGE_COMMENTS_BTN_UNPUBLISH') ?>
 							</button>
-						<?php elseif ($comment->enabled == 0): ?>
+						<?php elseif ($comment->enabled == 0 && $this->perms['edit']): ?>
 							<button class="akengage-comment-publish-btn btn btn-sm btn-outline-secondary"
 									data-akengageid="<?= $comment->id ?>">
 								<?= Text::_('COM_ENGAGE_COMMENTS_BTN_PUBLISH') ?>
@@ -172,7 +172,7 @@ $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->ena
 						<?php endif; ?>
 						</span>
 
-						<?php if($comment->enabled == -3): ?>
+						<?php if($comment->enabled == -3 && $this->perms['edit']): ?>
 							<span class="akengage-comment-mark-ham">
 								<button class="akengage-comment-markham-btn btn btn-sm btn-outline-success"
 										data-akengageid="<?= $comment->id ?>"
@@ -189,7 +189,7 @@ $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->ena
 								</button>
 							</span>
 							<?php endif; ?>
-						<?php else: ?>
+						<?php elseif ($comment->enabled == 1): ?>
 							<span class="akengage-comment-mark-possiblespam">
 								<button class="akengage-comment-possiblespam-btn btn btn-sm btn-outline-warning"
 										data-akengageid="<?= $comment->id ?>"

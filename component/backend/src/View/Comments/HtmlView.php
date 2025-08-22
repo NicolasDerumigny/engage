@@ -160,7 +160,7 @@ class HtmlView extends BaseHtmlView
 			'icon-engage'
 		);
 
-		if (!$this->isEmptyState && $canDo->get('core.edit.state'))
+		if (!$this->isEmptyState && $canDo->get('core.edit'))
 		{
 			/** @var DropdownButton $dropdown */
 			$dropdown = $toolbar->dropdownButton('status-group')

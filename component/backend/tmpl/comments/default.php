@@ -319,7 +319,7 @@ $i = 0;
 									<?= Factory::getDate($item->created)->format(Text::_('DATE_FORMAT_LC2'), true, true) ?>
 								</td>
 								<td class="w-5 d-none d-md-table-cell text-center">
-									<?php echo HTMLHelper::_('engage.published', $item->enabled, $i, 'comments.', $canChange, 'cb'); ?>
+									<?php echo HTMLHelper::_('engage.published', $item->enabled, $i, 'comments.', $canEdit, 'cb'); ?>
 								</td>
 							</tr>
 						<?php endforeach; ?>

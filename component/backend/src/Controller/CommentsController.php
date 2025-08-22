@@ -23,6 +23,7 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Router\Route;
 use Joomla\Input\Input;
 use Joomla\Utilities\ArrayHelper;
+use RuntimeException;
 
 class CommentsController extends AdminController
 {
@@ -67,6 +68,38 @@ class CommentsController extends AdminController
 	public function getModel($name = 'Comment', $prefix = 'Administrator', $config = ['ignore_request' => true])
 	{
 		return parent::getModel($name, $prefix, $config);
+	}
+
+	/**
+	 * Performs security checks, then publish a message
+	 *
+	 * @return  void
+	 *
+	 * @since 3.6.0-fork
+	 */
+	public function publish()
+	{
+		$task = $this->getTask();
+		try
+		{
+			$canEdit = Factory::getUser()->authorise('core.edit', 'com_engage');
+			if (!$canEdit)
+			{
+				throw new RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+			}
+		}
+		catch (\Exception $e)
+		{
+			$this->setMessage($e->getMessage(), 'error');
+			$this->setRedirect(
+				$this->getReturnUrl() ?: Route::_(
+					'index.php?option=' . $this->option . '&view=' . $this->view_list
+					. $this->getRedirectToListAppend(), false
+				)
+			);
+			return;
+		}
+		parent::publish();
 	}
 
 	/**
@@ -121,8 +154,28 @@ class CommentsController extends AdminController
 			// Mark the items.
 			try
 			{
-				$model->publish($cid, -3);
-				$errors = $model->getErrors();
+				$allPublished = true;
+				foreach ($cid as $id)
+				{
+					$item = $model->getItem($id);
+					if ((int) $item->enabled !== 1)
+					{
+						$allPublished = false;
+						break;
+					}
+				}
+
+				$canEdit = Factory::getUser()->authorise('core.edit', 'com_engage');
+				$canEditState = Factory::getUser()->authorise('core.edit.state', 'com_engage');
+				if ($canEdit || ($canEditState && $allPublished))
+				{
+					$model->publish($cid, -3);
+					$errors = $model->getErrors();
+				}
+				else
+				{
+					throw new RuntimeException(Text::_('JERROR_ALERTNOAUTHOR'), 403);
+				}
 
 				if (empty($errors))
 				{
