@@ -56,3 +56,6 @@ fef.min.css
 
 ## NPM build dependencies
 node_modules/**
+
+## Sass build files
+.sass-cache

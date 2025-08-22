@@ -3,6 +3,10 @@
  * @package   AkeebaEngage
  * @copyright Copyright (c)2020-2025 Nicholas K. Dionysopoulos / Akeeba Ltd
  * @license   GNU General Public License version 3, or later
+ *
+ * Modified by Nicolas Derumigny:
+ * - Do not use conjoin
+ * - Use inner join when semantically correct to increase performances
  */
 
 namespace Akeeba\Component\Engage\Administrator\Model;
@@ -29,6 +33,8 @@ use Joomla\Database\ParameterType;
 class CommentsModel extends ListModel
 {
 	use ModelPopulateStateTrait;
+
+	private const CONJOINED = false;
 
 	/**
 	 * The number of tree-aware comments fetched by commentIDTreeSliceWithDepth
@@ -921,6 +927,6 @@ class CommentsModel extends ListModel
 
 	private function canBeConjoined(): bool
 	{
-		return $this->getDatabase()->getServerType() === 'mysql';
+		return self::CONJOINED && $this->getDatabase()->getServerType() === 'mysql';
 	}
 }
