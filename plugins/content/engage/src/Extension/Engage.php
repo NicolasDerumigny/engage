@@ -375,8 +375,6 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		}
 	}
 
-
-
 	/**
 	 * Returns the content to display after an article. Used to render the comments interface.
 	 *

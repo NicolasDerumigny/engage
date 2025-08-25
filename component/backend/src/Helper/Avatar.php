@@ -55,7 +55,7 @@ class Avatar
 		{
 			if (empty($fallbackEmail))
 			{
-				return $fallbackEmail;
+				return '';
 			}
 
 			$fakeUser        = new User();

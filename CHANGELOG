@@ -6,6 +6,9 @@ Akeeba Engage 3.6.0-fork
 ~ Do not use conjoin on `CommentsModel`
 ! Summaries must not count unpublished / spam comments for non-managers
 ~ Permission changes. Comment managers (users with `core.edit.state` permission) may *only* report as spam/ham. Users with `core.edit` permission can unpublish / delete without restrictions.
++ Allow guest users to comment without email, do not show avatar in this case.
++ Do not account for tags in comment character count
++ Do not accept comments in cyrilic
 
 Akeeba Engage 3.5.0
 ================================================================================

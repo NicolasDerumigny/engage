@@ -1,10 +1,9 @@
 This is an *unofficial* fork of Akeeba Engage, used to suite our own needs / usage. THIS REPOSITORY COMES WITH NO GUARANTEE!
 
 TODO:
-- Allow guest users to comment without email and add an option for it in top level config
 - Test / Correct button disable on comment submission
-- Do not show any image for guest
 - Correct return url on edit / comment deletion
+- Quote support on max depth
 
 ---------
 # Akeeba Engage

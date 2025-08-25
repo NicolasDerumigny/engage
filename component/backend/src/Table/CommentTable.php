@@ -196,19 +196,13 @@ class CommentTable extends AbstractTable
 			$this->created_by = 0;
 		}
 
-		if (empty($this->name) || empty($this->email))
-		{
-			$this->name  = null;
-			$this->email = null;
-		}
-
-		if (empty($this->created_by) && empty($this->name) && empty($this->email))
+		if (empty($this->created_by) && empty($this->name))
 		{
 			throw new RuntimeException(Text::_('COM_ENGAGE_COMMENTS_ERR_NO_NAME_OR_EMAIL'));
 		}
 
 		// If we have a guest user, make sure we don't have another user with the same email address
-		if (($this->created_by <= 0) && !empty(UserFetcher::getUserIdByEmail($this->email)))
+		if (($this->created_by <= 0) && !empty($this->email) && !empty(UserFetcher::getUserIdByEmail($this->email)))
 		{
 			throw new RuntimeException(Text::sprintf('COM_ENGAGE_COMMENTS_ERR_EMAIL_IN_USE', $this->email));
 		}
@@ -225,7 +219,13 @@ class CommentTable extends AbstractTable
 		$cparams       = ComponentHelper::getParams('com_engage');
 		$minLength     = $cparams->get('min_length', 0);
 		$maxLength     = $cparams->get('max_length', 0);
-		$commentLength = function_exists('mb_strlen') ? mb_strlen($this->body ?? '', '8bit') : strlen($this->body ?? '');
+		// Remove Russian
+		if (preg_match('/[\p{Cyrillic}]/u', $this->body)) {
+		    throw new RuntimeException(Text::sprintf('Сука Блять'));
+		}
+		// Correctly count characters
+		$body = str_replace("\n", "", str_replace("\r", "", strip_tags($this->body ?? '')));
+		$commentLength = function_exists('mb_strlen') ? mb_strlen($body, '8bit') : strlen($body);
 
 		if ($maxLength > 0 && $minLength > 0 && $maxLength < $minLength)
 		{

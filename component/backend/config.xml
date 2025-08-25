@@ -67,6 +67,18 @@
         </field>
 
         <field
+                name="guests_mandatory_mail"
+                type="radio"
+                layout="joomla.form.field.radio.switcher"
+                label="COM_ENGAGE_CONFIG_MANDATORY_GUEST_MAIL_LABEL"
+                description="COM_ENGAGE_CONFIG_MANDATORY_GUEST_MAIL_DESC"
+                default="1"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+        <field
                 name="tos_accept"
                 type="radio"
                 layout="joomla.form.field.radio.switcher"

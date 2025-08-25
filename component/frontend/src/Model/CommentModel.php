@@ -208,7 +208,11 @@ class CommentModel extends AdminCommentModel
 		else
 		{
 			$form->setFieldAttribute('name', 'required', 'true');
-			$form->setFieldAttribute('email', 'required', 'true');
+			if (ComponentHelper::getParams('com_engage')->get('guests_mandatory_mail', 1)) {
+				$form->setFieldAttribute('email', 'required', 'true');
+			} else {
+				$form->removeField('email');
+			}
 		}
 
 		// Only guests see the Accept ToS field and only if configured
