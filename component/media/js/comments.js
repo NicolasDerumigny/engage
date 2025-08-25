@@ -57,9 +57,10 @@ akeeba.Engage.Comments.onEditButton = function (e)
      * Construct the edit URL for the comment. The akeeba.Engage.Comments.editURL script option key comes from the
      * components/com_engage\View\Comments\Html.php file.
      */
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
-
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.editURL")).replace("__ID__", id);
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.editURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onDeleteButton = function (e)
@@ -90,9 +91,10 @@ akeeba.Engage.Comments.onPublishButton = function (e)
      * Construct the edit URL for the comment. The akeeba.Engage.Comments.publishURL script option key comes from the
      * components/com_engage\View\Comments\Html.php file.
      */
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
-
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.publishURL")).replace("__ID__", id);
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.publishURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onUnpublishButton = function (e)
@@ -103,36 +105,58 @@ akeeba.Engage.Comments.onUnpublishButton = function (e)
      * Construct the edit URL for the comment. The akeeba.Engage.Comments.unpublishURL script option key comes from
      * the components/com_engage\View\Comments\Html.php file.
      */
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
-
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.unpublishURL")).replace("__ID__", id);
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.unpublishURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onMarkHamButton = function (e)
 {
     e.preventDefault();
 
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
-
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.markhamURL")).replace("__ID__", id);
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.markhamURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onMarkSpamButton = function (e)
 {
     e.preventDefault();
 
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    /* Modification */
+    var shouldProceed = confirm(Joomla.Text._("Voulez-vous vraiment marquer le commentaire comme spam ?"));
 
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.markspamURL")).replace("__ID__", id);
+    if (!shouldProceed)
+    {
+        return;
+    }
+    /* End modification */
+
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.markspamURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onMarkPossibleSpamButton = function (e)
 {
     e.preventDefault();
 
-    var id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    /* Modification */
+    var shouldProceed = confirm(Joomla.Text._("Voulez-vous vraiment marquer le commentaire comme spam ?"));
 
-    window.location = atob(Joomla.getOptions("akeeba.Engage.Comments.possiblespamURL")).replace("__ID__", id);
+    if (!shouldProceed)
+    {
+        return;
+    }
+    /* End modification */
+
+    const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
+    const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.possiblespamURL")).replace("__ID__", id), window.location.origin);
+    url.searchParams.set("returnurl", btoa(atob(url.searchParams.get("returnurl")).replaceAll("__ID__", id)));
+    window.location = url;
 };
 
 akeeba.Engage.Comments.onReplyButton = function (e)

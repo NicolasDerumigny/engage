@@ -2,7 +2,6 @@ This is an *unofficial* fork of Akeeba Engage, used to suite our own needs / usa
 
 TODO:
 - Test / Correct button disable on comment submission
-- Correct return url on edit / comment deletion
 - Quote support on max depth
 
 ---------

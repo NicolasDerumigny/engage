@@ -257,7 +257,15 @@ class HtmlView extends BaseHtmlView
 		$doc = $app->getDocument();
 
 		$baseUrl = Uri::getInstance(Route::_('index.php?option=com_engage'));
-		$baseUrl->setVar('returnurl', base64_encode(Uri::getInstance()->toString()));
+		$returnUrl = clone Uri::getInstance();
+		$returnUrl->setFragment('akengage-comment-__ID__');
+		$returnUrl->setVar('akengage-cid', '__ID__');
+		$returnUrl->delVar('akengage_limitstart');
+		$returnUrlwithID = base64_encode($returnUrl->toString());
+		$returnUrl->setFragment('akengage-comments-section');
+		$returnUrl->delVar('akengage-cid');
+		$returnUrl = base64_encode($returnUrl->toString());
+		$baseUrl->setVar('returnurl', $returnUrlwithID);
 		$baseUrl->setVar($app->getFormToken(), 1);
 
 		$baseUrl->setVar('id', '__ID__');
@@ -268,9 +276,11 @@ class HtmlView extends BaseHtmlView
 		$baseUrl->setVar('cid[]', '__ID__');
 
 		$baseUrl->setVar('task', 'comments.delete');
+		$baseUrl->setVar('returnurl', $returnUrl);
 		$doc->addScriptOptions('akeeba.Engage.Comments.deleteURL', base64_encode($baseUrl->toString()));
 
 		$baseUrl->setVar('task', 'comments.publish');
+		$baseUrl->setVar('returnurl', $returnUrlwithID);
 		$doc->addScriptOptions('akeeba.Engage.Comments.publishURL', base64_encode($baseUrl->toString()));
 
 		$baseUrl->setVar('task', 'comments.unpublish');

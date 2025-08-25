@@ -9,6 +9,7 @@ Akeeba Engage 3.6.0-fork
 + Allow guest users to comment without email, do not show avatar in this case.
 + Do not account for tags in comment character count
 + Do not accept comments in cyrilic
++ Redirect to the target comment after edit/(un)published/marking
 
 Akeeba Engage 3.5.0
 ================================================================================

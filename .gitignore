@@ -59,3 +59,7 @@ node_modules/**
 
 ## Sass build files
 .sass-cache
+
+## Minified files
+*.min.js
+*.min.js.map
