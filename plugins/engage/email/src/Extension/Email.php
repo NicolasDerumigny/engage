@@ -296,9 +296,11 @@ class Email extends CMSPlugin implements SubscriberInterface
 		}
 
 		$userEmails = [];
-
-		$user                     = $this->getUser($parent);
-		$userEmails[$user->email] = $user->name;
+		$user = $this->getReplyToUser();
+		if (!empty($user->email))
+		{
+			$userEmails[$user->email] = $user->name;
+		}
 
 		return $userEmails;
 	}
@@ -484,6 +486,35 @@ class Email extends CMSPlugin implements SubscriberInterface
 		$user        = new User(0);
 		$user->name  = $comment->name;
 		$user->email = $comment->email;
+
+		return $user;
+    }
+
+	/**
+	 * Get a user object from the input form data
+	 *
+	 * @return  User|null
+	 * @since   3.0.0
+	 */
+	private function getReplyToUser(): ?User
+	{
+		$data = $this->getApplication()->input->get('jform', [], 'array');
+		$userId = (int) ($data['reply_user_id'] ?? 0);
+		if ($userId)
+		{
+			try
+			{
+				return UserFetcher::getUser($userId);
+			}
+			catch (Exception $e)
+			{
+				return null;
+			}
+		}
+
+		$user        = new User(0);
+		$user->name  = null;
+		$user->email = null;
 
 		return $user;
 	}

@@ -1,8 +1,4 @@
-This is an *unofficial* fork of Akeeba Engage, used to suite our own needs / usage. THIS REPOSITORY COMES WITH NO GUARANTEE!
-
-TODO:
-- Test / Correct button disable on comment submission
-- Quote support on max depth
+This is an *unofficial* fork of Akeeba Engage, modified and maintained used to suite our own needs / usage. THIS REPOSITORY COMES WITH NO GUARANTEE!
 
 ---------
 # Akeeba Engage

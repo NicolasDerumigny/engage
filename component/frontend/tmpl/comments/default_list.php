@@ -261,6 +261,7 @@ $bsCommentStateClass =  ($comment->enabled == 1) ? 'secondary' : (($comment->ena
 				<button class="akengage-comment-reply-btn btn btn-sm btn-outline-primary mb-1"
 						data-akengageid="<?= ($comment->depth < $this->maxLevel) ? $comment->id : $parentIds[$this->maxLevel - 1] ?>"
 						data-akengagereplyto="<?= $this->escape(($comment->depth < $this->maxLevel) ? $user->name : $parentNames[$this->maxLevel - 1]) ?>"
+						data-akengagereplyuserid="<?= $user->id ?>"
 				>
 					<?= Text::_('COM_ENGAGE_COMMENTS_BTN_REPLY') ?>
 				</button>

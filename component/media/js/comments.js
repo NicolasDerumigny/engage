@@ -170,10 +170,12 @@ akeeba.Engage.Comments.onReplyButton = function (e)
 
     var parentId      = (clickedElement.dataset["akengageid"] ?? 0) * 1;
     var inReplyToName = clickedElement.dataset["akengagereplyto"] ?? 0;
+    var parentUserId  = (clickedElement.dataset["akengagereplyuserid"] ?? 0) * 1;
     var form          = document.forms["akengageCommentForm"];
     var wrapper       = document.getElementById("akengage-comment-inreplyto-wrapper");
 
     form["jform[parent_id]"].value = parentId;
+    form["jform[reply_user_id]"].value = parentUserId;
     wrapper.classList.add('d-none');
     wrapper.style.display = "none";
 
@@ -199,6 +201,7 @@ akeeba.Engage.Comments.onCancelReplyButton = function (e)
     var inReplyTo = document.getElementById("akengage-comment-inreplyto-name");
 
     form["jform[parent_id]"].value = 0;
+    form["jform[reply_user_id]"].value = parentUserId;
     wrapper.style.display          = "none";
     wrapper.classList.add('d-none');
     inReplyTo.innerText            = "";
