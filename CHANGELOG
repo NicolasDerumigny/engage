@@ -10,6 +10,7 @@ Akeeba Engage 3.6.0-fork
 + Do not account for tags in comment character count
 + Do not accept comments in cyrilic
 + Redirect to the target comment after edit/(un)published/marking
+~ Add confirmation to report as spam / mark as possible spam
 
 Akeeba Engage 3.5.0
 ================================================================================

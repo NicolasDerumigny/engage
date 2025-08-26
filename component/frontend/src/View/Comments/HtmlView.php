@@ -299,6 +299,8 @@ class HtmlView extends BaseHtmlView
 		Text::script('COM_ENGAGE_COMMENTS_FORM_BTN_SUBMIT_PLEASE_WAIT');
 
 		Text::script('COM_ENGAGE_COMMENTS_DELETE_PROMPT');
+		Text::script('COM_ENGAGE_COMMENTS_MARKPOSSIBLESPAM_PROMPT');
+		Text::script('COM_ENGAGE_COMMENTS_MARKSPAM_PROMPT');
 
 		// Comment form
 		if (!$this->areCommentsClosed && $this->perms['create'])

@@ -107,5 +107,7 @@ class Engagecache extends CMSPlugin implements SubscriberInterface
 
 		Text::script('COM_ENGAGE_COMMENTS_FORM_BTN_SUBMIT_PLEASE_WAIT');
 		Text::script('COM_ENGAGE_COMMENTS_DELETE_PROMPT');
+		Text::script('COM_ENGAGE_COMMENTS_MARKPOSSIBLESPAM_PROMPT');
+		Text::script('COM_ENGAGE_COMMENTS_MARKSPAM_PROMPT');
 	}
 }

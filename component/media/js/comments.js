@@ -67,7 +67,7 @@ akeeba.Engage.Comments.onDeleteButton = function (e)
 {
     e.preventDefault();
 
-    var shouldProceed = confirm(Joomla.Text._("COM_ENGAGE_COMMENTS_DELETE_PROMPT"));
+    let shouldProceed = confirm(Joomla.Text._("COM_ENGAGE_COMMENTS_DELETE_PROMPT"));
 
     if (!shouldProceed)
     {
@@ -125,14 +125,12 @@ akeeba.Engage.Comments.onMarkSpamButton = function (e)
 {
     e.preventDefault();
 
-    /* Modification */
-    var shouldProceed = confirm(Joomla.Text._("Voulez-vous vraiment marquer le commentaire comme spam ?"));
+    let shouldProceed = confirm(Joomla.Text._("COM_ENGAGE_COMMENTS_MARKSPAM_PROMPT"));
 
     if (!shouldProceed)
     {
         return;
     }
-    /* End modification */
 
     const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
     const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.markspamURL")).replace("__ID__", id), window.location.origin);
@@ -144,14 +142,12 @@ akeeba.Engage.Comments.onMarkPossibleSpamButton = function (e)
 {
     e.preventDefault();
 
-    /* Modification */
-    var shouldProceed = confirm(Joomla.Text._("Voulez-vous vraiment marquer le commentaire comme spam ?"));
+    let shouldProceed = confirm(Joomla.Text._("COM_ENGAGE_COMMENTS_MARKPOSSIBLESPAM_PROMPT"));
 
     if (!shouldProceed)
     {
         return;
     }
-    /* End modification */
 
     const id = akeeba.Engage.Comments.getAssetIdFromEvent(e);
     const url = new URL(atob(Joomla.getOptions("akeeba.Engage.Comments.possiblespamURL")).replace("__ID__", id), window.location.origin);
