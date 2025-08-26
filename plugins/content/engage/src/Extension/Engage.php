@@ -285,9 +285,13 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		 * @var   Content|object|mixed $data
 		 */
 		[$context, $data] = array_values($event->getArguments());
-		$this->invalidateCommentCountCacheFromAssetId($context, $data->asset_id);
 
-		if ($context != 'com_content.article')
+		if ($context === "com_engage.comment")
+		{
+			$this->invalidateCommentCountCacheFromAssetId($data->asset_id);
+		}
+
+		if ($context !== 'com_content.article')
 		{
 			return;
 		}
@@ -438,7 +442,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			$db->setQuery($query);
 			$assetId = $db->loadResult();
 
-			$this->invalidateCommentCountCacheFromAssetId($context, $assetId);
+			$this->invalidateCommentCountCacheFromAssetId($assetId);
 		}
 	}
 
@@ -452,12 +456,8 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @return  void
 	 * @since   3.6.0-fork
 	 */
-	private function invalidateCommentCountCacheFromAssetId($context, $assetId)
+	private function invalidateCommentCountCacheFromAssetId($assetId)
 	{
-		if ($context !== "com_engage.comment")
-		{
-			return;
-		}
 		$db = $this->getDatabase();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('id'))

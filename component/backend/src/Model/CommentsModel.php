@@ -458,11 +458,11 @@ class CommentsModel extends ListModel
 					$db->quoteName('u.id') . ' = ' . $db->quoteName('c.created_by')
 				)
 				->join(
-					'LEFT', $db->quoteName('#__content', 'a'),
+					'INNER', $db->quoteName('#__content', 'a'),
 					$db->quoteName('a.asset_id') . ' = ' . $db->quoteName('c.asset_id')
 				)
 				->join(
-					'LEFT', $db->quoteName('#__categories', 'cat'),
+					'INNER', $db->quoteName('#__categories', 'cat'),
 					$db->quoteName('cat.id') . ' = ' . $db->quoteName('a.catid')
 				);
 		}

@@ -3,7 +3,7 @@ Akeeba Engage 3.6.0-fork
 ================================================================================
 + Use caching for comments summary
 + Add summary for `com_tags.tag` pages
-~ Do not use conjoin on `CommentsModel`
+~ Do not use conjoin on `CommentsModel`, but inner join
 ! Summaries must not count unpublished / spam comments for non-managers
 ~ Permission changes. Comment managers (users with `core.edit.state` permission) may *only* report as spam/ham. Users with `core.edit` permission can unpublish / delete without restrictions.
 + Allow guest users to comment without email, do not show avatar in this case.
