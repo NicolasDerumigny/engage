@@ -259,14 +259,14 @@ class CommentsModel extends ListModel
 			}, $allIDs
 		);
 
-		$this->treeAwareCount = count($allIDs);
-
 		// Filter out orphan nodes (children of deleted or unpublished comments)
 		$allIDs = array_filter(
 			$allIDs, function ($parent_id) use ($allIDs) {
 			return is_null($parent_id) || array_key_exists($parent_id, $allIDs);
 		}
 		);
+
+		$this->treeAwareCount = count($allIDs);
 
 		/**
 		 * Create a tree version of the comments and flatten it out

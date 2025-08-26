@@ -31,12 +31,12 @@ $cParams = ComponentHelper::getParams('com_engage');
 		aria-label="<?= Text::_('COM_ENGAGE_COMMENTS_SECTION_HEADER') ?>">
 
 	<h3 class="akengage-title h4 border-bottom mb-2">
-		<?= Text::plural($this->headerKey, $this->pagination->total, $this->title) ?>
+		<?= Text::plural($this->headerKey, $this->itemCount, $this->title) ?>
 	</h3>
 
 	<?= $this->loadPosition('engage-before-comments') ?>
 
-	<?php if ($this->pagination->total): ?>
+	<?php if ($this->itemCount): ?>
 		<div class="akengage-list-container">
 			<?= $this->loadTemplate('list') ?>
 		</div>
