@@ -46,7 +46,7 @@ $headerKey = $lang->hasKey($key) ? $key : $headerKey;
 $uri = Uri::getInstance($meta['public_url']);
 $uri->setFragment('akengage-comments-section');
 ?>
-<aside class="akenage-comments-counter--featured">
+<aside class="akenage-comments-counter--newsflash">
 	<a href="<?= $uri->toString() ?>">
 		<data itemprop="commentCount" value="<?= $numComments ?>">
 			<?= Text::plural($headerKey, $numComments, $row->title) ?>

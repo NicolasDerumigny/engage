@@ -337,16 +337,31 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @return  string
 	 * @since   3.6.0
 	 */
-	private function renderCommentCountCached($params, $row, ?string $context, bool $before = true): string
+	private function renderCommentCountCached($params, $row, ?string $context, bool $before): string
 	{
 		$cache = $this->getCommentCountCache();
 		$isManager = UserFetcher::getUser()->authorise('core.edit.state', 'com_engage') ? "manager_" : "normal_";
 		$isBefore = $before ? "before_" : "after_";
-		$key = $isBefore . $isManager . $context . $row->id;
+
+		/**
+		 * When Joomla is rendering an article in a Newsflash module it uses the same context as rendering an article
+		 * through com_content (com_content.article). However, we do NOT want the newsflash articles to display comments!
+		 *
+		 * This is an ugly hack around this problem. It's based on the observation that the newsflash module is passing
+		 * its own module options in the $params parameter to this event. As a result it has the `moduleclass_sfx` key
+		 * defined, whereas this key does not exist when rendering an article through com_content.
+		 */
+		$isNewsFlash = ($context === 'com_content.article') && ($params instanceof Registry) && $params->exists('moduleclass_sfx');
+		$newsFlash = "";
+		if ($isNewsFlash)
+		{
+			$newsFlash = ".newsflash";
+		}
+		$key = $isBefore . $isManager . $context . $newsFlash . $row->id;
 		$data = $cache->get($key);
 		if ($data === false)
 		{
-			$data = $this->renderCommentCount($params, $row, $context, $before);
+			$data = $this->renderCommentCount($params, $row, $context, $before, $isNewsFlash);
 			$cache->store($data, $key);
 		}
 		return $data;
@@ -362,7 +377,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	private function invalidateCommentCountCache($id)
 	{
 		$cache = $this->getCommentCountCache();
-		foreach (['com_content.article', 'com_categories.category', 'com_content.featured', 'com_tags.tag'] as $context)
+		foreach (['com_content.article', 'com_content.article.newsflash', 'com_categories.category', 'com_content.featured', 'com_tags.tag'] as $context)
 		{
 			foreach(["manager_", "normal_"] as $isManager)
 			{
@@ -373,6 +388,8 @@ class Engage extends CMSPlugin implements SubscriberInterface
 				}
 			}
 		}
+		// Invalidate the newsflash cache to display correct (new) comment count
+		Factory::getCache("mod_articles_news")->clean();
 	}
 
 	/**
@@ -482,6 +499,7 @@ class Engage extends CMSPlugin implements SubscriberInterface
 			// Invalidate only the updated id
 			$this->invalidateCommentCountCache($id);
 		}
+
 
 		// In the frontend it uses com_content.form because screw you, that's why.
 		if (!in_array($context, ['com_categories.category', 'com_content.article', 'com_content.form']))
@@ -1065,11 +1083,12 @@ class Engage extends CMSPlugin implements SubscriberInterface
 	 * @param   object|mixed    $row
 	 * @param   string|null     $context
 	 * @param   bool            $before  Am I asked to render this before the content?
+	 * @param   bool            $isNewsflash  Am I in a newsflash module?
 	 *
 	 * @return  string
 	 * @since   1.0.0
 	 */
-	private function renderCommentCount($params, $row, ?string $context, bool $before = true): string
+	private function renderCommentCount($params, $row, ?string $context, bool $before = true, bool $isNewsFlash = false): string
 	{
 		// We need to be given the right kind of data
 		if (!is_object($params) || !($params instanceof Registry) || !is_object($row))
@@ -1082,16 +1101,6 @@ class Engage extends CMSPlugin implements SubscriberInterface
 		{
 			return '';
 		}
-
-		/**
-		 * When Joomla is rendering an article in a Newsflash module it uses the same context as rendering an article
-		 * through com_content (com_content.article). However, we do NOT want the newsflash articles to display comments!
-		 *
-		 * This is an ugly hack around this problem. It's based on the observation that the newsflash module is passing
-		 * its own module options in the $params parameter to this event. As a result it has the `moduleclass_sfx` key
-		 * defined, whereas this key does not exist when rendering an article through com_content.
-		 */
-		$isNewsFlash = ($context === 'com_content.article') && ($params instanceof Registry) && $params->exists('moduleclass_sfx');
 
 		if (!$isNewsFlash && !in_array($context, ['com_content.category', 'com_content.featured', 'com_tags.tag']))
 		{
