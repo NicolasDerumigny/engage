@@ -12,12 +12,12 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 
 /**
- * Blog Article comments summary
+ * Newsflash module article comments summary
  *
- * This layout is used when displaying the comments summary in the blog view.
+ * This layout is used when displaying the comments summary in the Newsflash module
  *
  * Override by creating the folder templates/YOUR_TEMPLATE/html/layouts/akeeba/engage/content and copying this file in
- * there. That file will be used instead of the file plugins/content/engage/layouts/akeeba/engage/content/blog.php
+ * there. That file will be used instead of the file plugins/content/engage/layouts/akeeba/engage/content/newsflash.php
  *
  * @var  array          $displayData The incoming display data. It's extracted into scope in the following variables.
  * @var  CMSApplication $app         The current application
@@ -46,7 +46,7 @@ $headerKey = $lang->hasKey($key) ? $key : $headerKey;
 $uri = Uri::getInstance($meta['public_url']);
 $uri->setFragment('akengage-comments-section');
 ?>
-<aside class="akenage-comments-counter--blog">
+<aside class="akenage-comments-counter--newsflash">
 	<a href="<?= $uri->toString() ?>">
 		<data itemprop="commentCount" value="<?= $numComments ?>">
 			<?= Text::plural($headerKey, $numComments, $row->title) ?>

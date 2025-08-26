@@ -35,7 +35,7 @@ if (!Factory::getUser()->authorise('core.edit.state', 'com_engage'))
 {
 	$model->setState('filter.enabled', 1);
 }
-$numComments = $model->getTotal();
+$numComments = $model->getTreeAwareCount();
 
 // Language key to use
 $headerKey = 'COM_ENGAGE_COMMENTS_HEADER_N_COMMENTS';

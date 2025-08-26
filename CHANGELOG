@@ -12,6 +12,7 @@ Akeeba Engage 3.6.0-fork
 + Redirect to the target comment after edit/(un)published/marking
 ~ Add confirmation to report as spam / mark as possible spam
 + Display and send mail to replied user, even when max comment depth has been reached
++ Add option to show comment count before article
 
 Akeeba Engage 3.5.0
 ================================================================================

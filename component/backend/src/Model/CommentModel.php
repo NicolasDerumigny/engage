@@ -150,14 +150,16 @@ class CommentModel extends AdminModel
 					return false;
 				}
 
+				// Needed to propagate event
+				PluginHelper::importPlugin('content');
 				// Trigger the before change state / before delete event.
 				if (!$asSpam)
 				{
-					$result = Factory::getApplication()->triggerEvent($this->event_before_change_state, array($context, [$id], 1));
+					$result = Factory::getApplication()->triggerEvent($this->event_before_change_state, [$context, [$id], 1]);
 				}
 				else
 				{
-					$result = Factory::getApplication()->triggerEvent($this->event_before_delete, array($context, $table));
+					$result = Factory::getApplication()->triggerEvent($this->event_before_delete, [$context, $table]);
 				}
 
 				if (\in_array(false, $result, true))

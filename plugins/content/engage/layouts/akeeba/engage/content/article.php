@@ -12,7 +12,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Uri\Uri;
 
 /**
- * Newsflash module article comments summary
+ * Article module article comments summary
  *
  * This layout is used when displaying the comments summary in the Newsflash module
  *
@@ -35,7 +35,7 @@ if (!Factory::getUser()->authorise('core.edit.state', 'com_engage'))
 {
 	$model->setState('filter.enabled', 1);
 }
-$numComments = $model->getTotal();
+$numComments = $model->getTreeAwareCount();
 
 // Language key to use
 $headerKey = 'COM_ENGAGE_COMMENTS_HEADER_N_COMMENTS';
@@ -46,7 +46,7 @@ $headerKey = $lang->hasKey($key) ? $key : $headerKey;
 $uri = Uri::getInstance($meta['public_url']);
 $uri->setFragment('akengage-comments-section');
 ?>
-<aside class="akenage-comments-counter--newsflash">
+<aside class="akenage-comments-counter--article">
 	<a href="<?= $uri->toString() ?>">
 		<data itemprop="commentCount" value="<?= $numComments ?>">
 			<?= Text::plural($headerKey, $numComments, $row->title) ?>
