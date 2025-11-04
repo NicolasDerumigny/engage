@@ -358,6 +358,11 @@ class Email extends CMSPlugin implements SubscriberInterface
 		$commentUser    = $this->getUser($comment);
 		$meta           = Meta::getAssetAccessMeta($comment->asset_id);
 		$publicUri      = Uri::getInstance($meta['public_url']);
+		// Get the comment's URL
+		$publicUri->setFragment('akengage-comment-' . $comment->getId());
+		$publicUri->setVar('akengage_cid', $comment->getId());
+		$returnUrlComment = base64_encode($publicUri->toString());
+
 		$returnUrl      = base64_encode($meta['public_url']);
 		$protoUrl       = 'index.php?option=com_engage&task=%s&returnurl=%s';
 		$dateFormat     = Text::_('DATE_FORMAT_LC2');
@@ -418,12 +423,6 @@ class Email extends CMSPlugin implements SubscriberInterface
 				$recipient->name  = $name;
 				$recipient->email = $email;
 			}
-
-			// Get the comment's URL
-			$publicUri->setFragment('akengage-comment-' . $comment->getId());
-			$publicUri->setVar('akengage_cid', $comment->getId());
-
-			$returnUrlComment = base64_encode($publicUri->toString());
 
 			// Get the localised “created on” date
 			try
