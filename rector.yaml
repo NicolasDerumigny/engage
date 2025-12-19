@@ -463,7 +463,7 @@ services:
       JFolder: 'Joomla\CMS\Filesystem\Folder'
       JFilesystemHelper: 'Joomla\CMS\Filesystem\FilesystemHelper'
       JFilesystemPatcher: 'Joomla\CMS\Filesystem\Patcher'
-      JPath: 'Joomla\CMS\Filesystem\Path'
+      JPath: 'Joomla\Filesystem\Path'
       JStream: 'Joomla\CMS\Filesystem\Stream'
       JStreamString: 'Joomla\CMS\Filesystem\Streams\StreamString'
       JStringController: 'Joomla\CMS\Filesystem\Support\StringController'

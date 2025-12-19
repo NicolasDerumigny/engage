@@ -12,8 +12,8 @@ defined('_JEXEC') || die;
 use Exception;
 use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Language\Text;
+use Joomla\Filesystem\Path;
 use Throwable;
 
 /**
