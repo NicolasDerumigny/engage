@@ -201,7 +201,7 @@ akeeba.Engage.Comments.onCancelReplyButton = function (e)
     var inReplyTo = document.getElementById("akengage-comment-inreplyto-name");
 
     form["jform[parent_id]"].value = 0;
-    form["jform[reply_user_id]"].value = parentUserId;
+    form["jform[reply_user_id]"].value = 0;
     wrapper.style.display          = "none";
     wrapper.classList.add('d-none');
     inReplyTo.innerText            = "";
