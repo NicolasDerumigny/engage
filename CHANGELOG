@@ -15,6 +15,7 @@ Akeeba Engage 3.6.0-fork
 + Add option to show comment count before article
 + Correct comment count displayed in comment module
 + Links in response to comment email carry the comment anchor / reference
+# Comment actions JS handlers are correct when clicking of icons
 
 Akeeba Engage 3.5.0
 ================================================================================

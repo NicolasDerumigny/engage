@@ -21,25 +21,9 @@ if (typeof akeeba.Engage.Comments == "undefined")
     akeeba.Engage.Comments = {};
 }
 
-akeeba.Engage.Comments.getElementFromEvent = function (e)
-{
-    var clickedElement = null;
-
-    if (typeof e.target === "object")
-    {
-        clickedElement = e.target;
-    }
-    else if (typeof e.srcElement === "object")
-    {
-        clickedElement = e.srcElement;
-    }
-
-    return clickedElement;
-};
-
 akeeba.Engage.Comments.getAssetIdFromEvent = function (e)
 {
-    var clickedElement = akeeba.Engage.Comments.getElementFromEvent(e);
+    var clickedElement = e.currentTarget;
 
     if (clickedElement === null)
     {
@@ -159,7 +143,7 @@ akeeba.Engage.Comments.onReplyButton = function (e)
 {
     e.preventDefault();
 
-    var clickedElement = akeeba.Engage.Comments.getElementFromEvent(e);
+    var clickedElement = e.currentTarget;
 
     if (clickedElement === null)
     {
@@ -320,7 +304,7 @@ akeeba.Engage.Comments.unhideReplyArea = function ()
 };
 
 akeeba.Engage.Comments.onSubmit = function (e) {
-    const elButton = akeeba.Engage.Comments.getElementFromEvent(e);
+    const elButton = e.currentTarget;
 
     if (!elButton)
     {
