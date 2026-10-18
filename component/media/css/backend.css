@@ -6,10 +6,11 @@
 @font-face {
   font-family: "Akeeba Products";
   src: url("../fonts/Akeeba-Products.woff");
-  font-display: swap; }
+  font-display: swap;
+}
 .icon-engage:before,
 .icon-engage-j4:before {
-  font-family: 'Akeeba Products' !important;
+  font-family: "Akeeba Products" !important;
   font-style: normal !important;
   font-weight: normal !important;
   line-height: 1 !important;
@@ -17,9 +18,15 @@
   -webkit-font-smoothing: antialiased;
   position: relative;
   -moz-osx-font-smoothing: grayscale;
-  content: '\0049'; }
+  content: "I";
+}
 
 .comEngageLinkExternal:before {
-  content: unset !important; }
+  content: unset !important;
+}
+
+.comEngageCommentPreview p {
+  word-break: break-word;
+}
 
 /*# sourceMappingURL=backend.css.map */

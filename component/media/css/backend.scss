@@ -31,3 +31,7 @@
 .comEngageLinkExternal:before {
   content: unset !important;
 }
+
+.comEngageCommentPreview p {
+  word-break: break-word;
+}
